@@ -22,6 +22,7 @@ const { loadEnv } = require('./utils/load-env');
   const files = [
     path.join(root, 'db', 'security.sql'),
     path.join(root, 'db', 'rpc_functions.sql'),
+    path.join(root, 'db', 'indexes.sql'),
   ];
 
   function splitSQL(input) {

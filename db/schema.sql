@@ -129,7 +129,7 @@ do $$ begin
 end $$;
 
 -- Global summary view
-create or replace view public.student_exam_summary as
+create or replace view public.student_exam_summary with (security_invoker = true) as
   select
     s.id as student_id,
     s.code,

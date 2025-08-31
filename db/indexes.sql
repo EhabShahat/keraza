@@ -21,6 +21,7 @@
  create unique index if not exists uniq_sea_exam_student on public.student_exam_attempts (exam_id, student_id);
  create index if not exists idx_sea_exam on public.student_exam_attempts (exam_id, started_at desc);
  create index if not exists idx_sea_student on public.student_exam_attempts (student_id);
+  create index if not exists idx_sea_attempt_id on public.student_exam_attempts (attempt_id);
 
  -- IP rules lookups (create only if table exists)
  do $$ begin
@@ -30,7 +31,7 @@
      -- Optional helper index on ip_range for operations; may not accelerate << but harmless
      execute 'create index if not exists idx_ips_ip_range on public.exam_ips (ip_range)';
    end if;
- end $$;
+end $$;
 
  -- Ensure at most one active (published) exam at a time
  do $$

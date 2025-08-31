@@ -105,9 +105,9 @@ export default function ThankYouPage() {
     setStudentCode(code);
     let cancelled = false;
 
-    async function checkRemaining() {
+    async function checkRemaining(codeValue: string) {
       try {
-        const res = await fetch(`/api/public/exams/by-code?code=${encodeURIComponent(code)}`, { cache: "no-store" });
+        const res = await fetch(`/api/public/exams/by-code?code=${encodeURIComponent(codeValue)}`, { cache: "no-store" });
         if (!res.ok) {
           return;
         }
@@ -128,7 +128,7 @@ export default function ThankYouPage() {
         if (!cancelled) setRemainingChecked(true);
       }
     }
-    checkRemaining();
+    checkRemaining(code);
     return () => { cancelled = true; };
   }, [attemptInfo?.student_code]);
 
