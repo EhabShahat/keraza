@@ -198,7 +198,7 @@ export default function ThankYouPage() {
 
           {/* Remaining exams notice and redirect (prominent) */}
           {remainingChecked && studentCode && hasRemainingExams && (
-            <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-8 text-left">
+            <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-8 text-start">
               <p className="text-green-900 font-semibold mb-1">{t(locale, "more_exams_available")}</p>
               <p className="text-green-800 text-sm">{t(locale, "returning_to_exam_selection")}</p>
               <div className="mt-3">

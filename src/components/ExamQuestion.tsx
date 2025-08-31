@@ -67,14 +67,14 @@ export default function ExamQuestion({
         {/* Title - full row */}
         <h3 
           id={legendId} 
-          className={`text-lg font-medium text-[var(--foreground)] leading-relaxed select-none ${
+          className={`text-lg font-medium text-[var(--foreground)] leading-relaxed select-none flex items-baseline gap-1 ${
             questionHasArabic ? 'arabic-text rtl' : ''
           }`}
           dir={questionHasArabic ? 'rtl' : 'ltr'}
           lang={questionHasArabic ? 'ar' : undefined}
           translate="no"
         >
-          {q.required && <span className="text-red-500 mr-1">*</span>}
+          {q.required && <span className="text-red-500">*</span>}
           {q.question_text}
         </h3>
 

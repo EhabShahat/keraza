@@ -5,7 +5,7 @@ import Providers from "./providers";
 import StorageCleaner from "@/components/StorageCleaner";
 import StudentStorageCleaner from "@/components/StudentStorageCleaner";
 import { supabaseServer } from "@/lib/supabase/server";
-import { resolveStudentLocale, getDir, type StudentLocale } from "@/i18n/student";
+import { resolveStudentLocale, type StudentLocale } from "@/i18n/student";
 
 const appSans = Tajawal({
   variable: "--font-app-sans",
@@ -51,10 +51,8 @@ export default async function RootLayout({
   } catch {
     // ignore and keep default "en"
   }
-  const dir = getDir(locale);
-
   return (
-    <html lang={locale} dir={dir} translate="no" className="notranslate">
+    <html lang={locale} dir="ltr" translate="no" className="notranslate">
       <head>
         {/* Enhanced mobile compatibility */}
         <meta name="format-detection" content="telephone=no" />

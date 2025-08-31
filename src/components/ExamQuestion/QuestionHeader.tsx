@@ -15,12 +15,12 @@ export default function QuestionHeader({
       <div className="flex items-start justify-between gap-4">
         <h3 
           id={legendId} 
-          className={`text-lg font-medium text-[var(--foreground)] leading-relaxed flex-1 select-none ${
+          className={`text-lg font-medium text-[var(--foreground)] leading-relaxed flex-1 select-none flex items-baseline gap-1 ${
             questionHasArabic ? 'arabic-text' : ''
           }`}
           dir={questionHasArabic ? 'rtl' : 'ltr'}
         >
-          {q.required && <span className="text-red-500 mr-1">*</span>}
+          {q.required && <span className="text-red-500">*</span>}
           {q.question_text}
         </h3>
         
