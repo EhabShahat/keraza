@@ -507,6 +507,16 @@ export default function AttemptPage() {
   const disabled = state.completion_status === "submitted";
   const progressPercentage = total ? Math.round((answered / total) * 100) : 0;
 
+  // Sidebar/layout measurements and RTL-aware positioning to avoid overflow
+  const sidebarWidth = sidebarCollapsed ? 48 : 200;
+  const sidebarWidthPx = `${sidebarWidth}px`;
+  const asidePositionProps: any = dir === 'rtl'
+    ? { right: 0, left: 'auto', borderLeft: '1px solid var(--border)' }
+    : { left: 0, right: 'auto', borderRight: '1px solid var(--border)' };
+  const mainPaddingProps: any = dir === 'rtl'
+    ? { paddingRight: sidebarWidthPx }
+    : { paddingLeft: sidebarWidthPx };
+
   return (
     <div dir={dir} lang={locale} style={{ 
       minHeight: '100vh', 
@@ -688,16 +698,15 @@ export default function AttemptPage() {
         {/* Sidebar - Fixed to Screen */}
         <aside style={{
           backgroundColor: 'var(--card)',
-          borderRight: '1px solid var(--border)',
-          width: sidebarCollapsed ? '48px' : '200px',
-          minWidth: sidebarCollapsed ? '48px' : '200px',
+          width: sidebarWidthPx,
+          minWidth: sidebarWidthPx,
           height: `calc(100vh - ${headerHeight}px)`,
           position: 'fixed',
-          left: 0,
           top: `${headerHeight}px`, // Below fixed header
           zIndex: 40,
           overflow: 'auto',
-          padding: '0.5rem'
+          padding: '0.5rem',
+          ...asidePositionProps,
         }}>
           <div style={{ 
             display: 'flex', 
@@ -784,10 +793,11 @@ export default function AttemptPage() {
             flex: 1,
             padding: '1rem',
             overflow: 'auto',
-            width: `calc(100% - ${sidebarCollapsed ? '48px' : '200px'})`, // Full width minus sidebar
-            marginLeft: sidebarCollapsed ? '48px' : '200px', // Offset for fixed sidebar
+            width: '100%',
             height: `calc(100vh - ${headerHeight}px)`, // Full height minus header
-            position: 'relative'
+            position: 'relative',
+            boxSizing: 'border-box',
+            ...mainPaddingProps,
           }}
           onCopy={(e) => e.preventDefault()} 
           onCut={(e) => e.preventDefault()}
