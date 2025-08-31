@@ -39,14 +39,7 @@ export async function POST(req: NextRequest) {
     const token = await getBearerToken(req);
     const svc = supabaseServer(token || undefined);
 
-    // Enforce single active exam: if creating as published, archive others first
-    if (status === "published") {
-      const unpub = await svc
-        .from("exams")
-        .update({ status: "archived" })
-        .eq("status", "published");
-      if (unpub.error) return NextResponse.json({ error: unpub.error.message }, { status: 400 });
-    }
+    // Multiple published exams are allowed; do not auto-archive other exams.
 
     const { data, error } = await svc
       .from("exams")
