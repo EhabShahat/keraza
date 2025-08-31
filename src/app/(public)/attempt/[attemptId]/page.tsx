@@ -996,16 +996,43 @@ export default function AttemptPage() {
               marginBottom: '1rem',
               margin: '0 0 1rem 0'
             }}>
-              {t(locale, 'confirm_submission')}
+              {t(locale, 'submit_exam_q')}
             </h3>
+            <div style={{ 
+              color: 'var(--muted-foreground)', 
+              marginBottom: '1rem',
+              lineHeight: '1.5',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              rowGap: '0.5rem',
+              columnGap: '1rem'
+            }}>
+              <div><strong>{t(locale, 'total_questions')}</strong> {total}</div>
+              <div><strong>{t(locale, 'answered_label')}</strong> {answered}</div>
+              <div><strong>{t(locale, 'unanswered_label')}</strong> {Math.max(0, (total - answered))}</div>
+              <div><strong>{t(locale, 'progress_label')}</strong> {progressPercentage}%</div>
+            </div>
             <p style={{ 
               color: 'var(--muted-foreground)', 
-              marginBottom: '1.5rem',
+              marginBottom: '1rem',
               lineHeight: '1.5',
-              margin: '0 0 1.5rem 0'
+              margin: '0 0 1rem 0'
             }}>
-              {t(locale, 'submit_warning')}
+              {t(locale, 'cannot_be_undone')}
             </p>
+            {(total - answered) > 0 && (
+              <div style={{
+                backgroundColor: '#FEF3C7',
+                border: '1px solid #F59E0B',
+                color: '#92400E',
+                borderRadius: '0.375rem',
+                padding: '0.75rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{t(locale, 'warning')}</div>
+                <div>{t(locale, 'unanswered_warning', { count: Math.max(0, (total - answered)) })}</div>
+              </div>
+            )}
             <div style={{ 
               display: 'flex', 
               gap: '0.75rem', 
@@ -1026,7 +1053,7 @@ export default function AttemptPage() {
                 }}
                 disabled={submitting}
               >
-                {t(locale, 'yes_submit')}
+                {t(locale, 'confirm_submit_exam')}
               </button>
             </div>
           </div>

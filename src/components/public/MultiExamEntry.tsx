@@ -250,33 +250,27 @@ export default function MultiExamEntry() {
 
               <div className="grid grid-cols-1 gap-4">
                 {exams?.map((ex) => {
-                  const isDisabled = ex.ended || ex.not_started || ex.attempt_status === "completed";
+                  const isCompleted = ex.attempt_status === "completed";
+                  const isDisabled = ex.ended || ex.not_started || isCompleted;
                   const actionLabel = ex.attempt_status === "in_progress" ? t(locale, "continue_to_exam") : t(locale, "start_exam");
                   return (
                     <div key={ex.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{ex.title}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            <span className="inline-flex items-center gap-2">
+                              {isCompleted && (
+                                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              )}
+                              {ex.title}
+                            </span>
+                          </h3>
                           {ex.description && (
                             <p className="text-gray-600 text-sm mt-1">{ex.description}</p>
                           )}
-                          <div className="text-xs text-gray-500 mt-2 space-y-1">
-                            {ex.duration_minutes != null && (
-                              <div>
-                                {t(locale, "duration")} {ex.duration_minutes} {t(locale, "minutes")}
-                              </div>
-                            )}
-                            {ex.start_time && (
-                              <div>
-                                {t(locale, "available_from")} {formatDateInCairo(ex.start_time)}
-                              </div>
-                            )}
-                            {ex.end_time && (
-                              <div>
-                                {t(locale, "available_until")} {formatDateInCairo(ex.end_time)}
-                              </div>
-                            )}
-                          </div>
+                          {/* Intentionally removed duration and availability lines for cleaner UI */}
                         </div>
                         <div className="flex items-center gap-3">
                           {ex.not_started && (
@@ -285,7 +279,7 @@ export default function MultiExamEntry() {
                           {ex.ended && (
                             <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800 border border-red-200">{t(locale, "exam_ended")}</span>
                           )}
-                          {ex.attempt_status === "completed" && (
+                          {isCompleted && (
                             <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 border border-gray-200">{t(locale, "completed")}</span>
                           )}
                           <button
@@ -299,7 +293,7 @@ export default function MultiExamEntry() {
                                 {t(locale, "starting_exam")}
                               </span>
                             ) : (
-                              actionLabel
+                              isCompleted ? t(locale, "completed") : actionLabel
                             )}
                           </button>
                         </div>

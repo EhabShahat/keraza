@@ -33,25 +33,7 @@
    end if;
 end $$;
 
- -- Ensure at most one active (published) exam at a time
- do $$
- begin
-   -- If multiple exams are currently published, archive all but the most recently updated/created
-   if (select count(*) from public.exams where status = 'published') > 1 then
-     with ranked as (
-       select id,
-              row_number() over (order by coalesce(updated_at, created_at) desc nulls last) as rn
-       from public.exams
-       where status = 'published'
-     )
-     update public.exams e
-       set status = 'archived'
-     from ranked r
-     where e.id = r.id and r.rn > 1;
-   end if;
- end $$;
- 
- -- Partial unique index to enforce single published exam
- create unique index if not exists one_published_exam
-   on public.exams (status)
-   where status = 'published';
+-- Single-exam enforcement removed: allow multiple published exams concurrently.
+
+-- Drop legacy unique index that enforced a single published exam
+drop index if exists one_published_exam;
