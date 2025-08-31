@@ -15,7 +15,14 @@ export function useStudentLocale(): Ctx {
 }
 
 export default function PublicLocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<StudentLocale>("en");
+  // Initialize from SSR-provided <html lang> to avoid client flip from en->ar on mount
+  const [locale, setLocale] = useState<StudentLocale>(() => {
+    if (typeof document !== "undefined") {
+      const lang = document.documentElement.getAttribute("lang");
+      return lang === "ar" ? "ar" : "en";
+    }
+    return "en";
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -34,15 +41,6 @@ export default function PublicLocaleProvider({ children }: { children: React.Rea
   }, []);
 
   const dir = useMemo(() => getDir(locale), [locale]);
-
-  useEffect(() => {
-    try {
-      document.documentElement.setAttribute("dir", dir);
-      document.documentElement.setAttribute("lang", locale);
-    } catch {
-      // ignore if SSR
-    }
-  }, [dir, locale]);
 
   const value = useMemo(() => ({ locale, dir }), [locale, dir]);
 

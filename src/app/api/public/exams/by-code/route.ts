@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     // 1) Find student by global code
     const { data: stuRows, error: stuErr } = await svc
       .from("students")
-      .select("id")
+      .select("id, student_name")
       .eq("code", code)
       .limit(1);
 
@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ valid: false, reason: "not_found", exams: [] }, { status: 404 });
     }
 
-    const studentId = (stuRows[0] as { id: string }).id;
+    const studentId = (stuRows[0] as { id: string; student_name?: string | null }).id;
+    const studentName = (stuRows[0] as { id: string; student_name?: string | null }).student_name || null;
 
     // 2) Fetch all published code-based exams
     const { data: exams, error: exErr } = await svc
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
 
     // Early return if no exams
     if (!examIds.length) {
-      return NextResponse.json({ valid: true, student_id: studentId, exams: [] });
+      return NextResponse.json({ valid: true, student_id: studentId, student_name: studentName, exams: [] });
     }
 
     // 3) Fetch student's attempts per exam
@@ -101,7 +102,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ valid: true, student_id: studentId, exams: result });
+    return NextResponse.json({ valid: true, student_id: studentId, student_name: studentName, exams: result });
   } catch (e) {
     console.error("Unexpected error in by-code:", e);
     return NextResponse.json({ valid: false, exams: [] }, { status: 500 });

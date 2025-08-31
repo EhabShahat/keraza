@@ -32,6 +32,7 @@ export default function MultiExamEntry() {
   const [error, setError] = useState<string | null>(null);
   const [exams, setExams] = useState<ByCodeExamItem[] | null>(null);
   const [startingExamId, setStartingExamId] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState<string | null>(null);
 
   // Prefill code from URL if present
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function MultiExamEntry() {
       }
       const data = await res.json();
       const items: ByCodeExamItem[] = data?.exams || [];
+      setStudentName(data?.student_name || null);
       setExams(items);
     } catch {
       setError(t(locale, "error_loading_results"));
@@ -233,14 +235,14 @@ export default function MultiExamEntry() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">{t(locale, "exams_available_for_code", { code })}</h2>
+                  <h2 className="text-xl font-bold text-gray-900">{studentName ? t(locale, "exams_available_for_student", { name: studentName }) : t(locale, "exams_available_for_code", { code })}</h2>
                   {!hasResults && (
                     <p className="text-gray-600 text-sm mt-1">{t(locale, "no_exams_for_code")}</p>
                   )}
                 </div>
                 <button
                   className="btn btn-outline"
-                  onClick={() => { setExams(null); setError(null); }}
+                  onClick={() => { setExams(null); setError(null); setStudentName(null); }}
                 >
                   {t(locale, "change_code")}
                 </button>

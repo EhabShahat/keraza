@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
     // Remove console.log in production
     removeConsole: process.env.NODE_ENV === "production",
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin/debug",
+        destination: "/404",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

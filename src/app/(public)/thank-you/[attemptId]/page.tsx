@@ -196,6 +196,25 @@ export default function ThankYouPage() {
           
           <p className="text-lg text-[var(--muted-foreground)] mb-6">{thankMessage}</p>
 
+          {/* Remaining exams notice and redirect (prominent) */}
+          {remainingChecked && studentCode && hasRemainingExams && (
+            <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-8 text-left">
+              <p className="text-green-900 font-semibold mb-1">{t(locale, "more_exams_available")}</p>
+              <p className="text-green-800 text-sm">{t(locale, "returning_to_exam_selection")}</p>
+              <div className="mt-3">
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    const url = `/?code=${encodeURIComponent(studentCode)}`;
+                    try { router.push(url); } catch { window.location.href = url; }
+                  }}
+                >
+                  {t(locale, "go_to_exam_selection")}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Exam Details */}
           <div className="bg-[var(--muted)]/30 rounded-lg p-6 mb-8">
             <h3 className="font-semibold text-[var(--foreground)] mb-3">{t(locale, "submission_details")}</h3>
@@ -226,32 +245,7 @@ export default function ThankYouPage() {
             <p className="text-blue-800 text-sm">{t(locale, "thank_you_default_message")}</p>
           </div>
 
-          {/* Remaining exams notice and redirect */}
-          {remainingChecked && studentCode && hasRemainingExams && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-left">
-              <p className="text-green-800 font-medium mb-1">{t(locale, "more_exams_available")}</p>
-              <p className="text-green-700 text-sm">{t(locale, "returning_to_exam_selection")}</p>
-              <div className="mt-3">
-                <button
-                  className="btn btn-outline"
-                  onClick={() => {
-                    const url = `/?code=${encodeURIComponent(studentCode)}`;
-                    try { router.push(url); } catch { window.location.href = url; }
-                  }}
-                >
-                  {t(locale, "go_to_exam_selection")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Action Button */}
-          <button
-            onClick={() => window.close()}
-            className="btn btn-primary"
-          >
-            {t(locale, "close_window")}
-          </button>
+          
 
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-[var(--border)]">

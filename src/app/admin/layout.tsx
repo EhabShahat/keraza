@@ -18,8 +18,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminGuard>
       <a href="#main-content" className="skip-link">Skip to content</a>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+      <div className="min-h-screen min-h-[100svh] bg-gray-50">
+        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 safe-area-top">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-8">
@@ -75,12 +75,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {/* Admin Group */}
                   <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
 
-                    <NavLink href="/admin/debug">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                      </svg>
-                      🔍 Debug
-                    </NavLink>
                     <NavLink href="/admin/audit">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -172,18 +166,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </MobileNavLink>
 
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider pt-4 pb-1 border-t border-gray-100 mt-3">Admin</h3>
-                <MobileNavLink href="/admin/eg">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
-                  </svg>
-                  🥚 Easter Egg
-                </MobileNavLink>
-                <MobileNavLink href="/admin/debug">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                  </svg>
-                  🔍 Debug Tools
-                </MobileNavLink>
                 <MobileNavLink href="/admin/audit">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
