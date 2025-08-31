@@ -34,15 +34,37 @@ export default function MultiExamEntry() {
   const [startingExamId, setStartingExamId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
 
-  // Prefill code from URL if present
+  // Track current ?code value from URL
+  const codeParam = useMemo(() => (searchParams?.get("code") || "").trim(), [searchParams]);
+
+  // Prefill/refetch based on ?code param; rerun on param changes (including return navigation)
   useEffect(() => {
-    const initial = (searchParams?.get("code") || "").trim();
-    if (/^\d{4}$/.test(initial)) {
-      setCode(initial);
-      void verifyCode(initial);
+    if (/^\d{4}$/.test(codeParam)) {
+      setCode(codeParam);
+      void verifyCode(codeParam);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [codeParam]);
+
+  // Also refetch when the page regains focus or becomes visible (handles browser back/BFCache cases)
+  useEffect(() => {
+    function refetchIfCode() {
+      if (/^\d{4}$/.test(codeParam)) {
+        void verifyCode(codeParam);
+      }
+    }
+    const onFocus = () => refetchIfCode();
+    const onVisibility = () => {
+      try {
+        if (document.visibilityState === "visible") refetchIfCode();
+      } catch {}
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [codeParam]);
 
   const hasResults = useMemo(() => (exams?.length || 0) > 0, [exams]);
 
