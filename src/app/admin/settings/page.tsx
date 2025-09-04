@@ -57,18 +57,15 @@ export default function AdminSettingsPage() {
       setLoading(true);
       setError(null);
       
-      const { data, error: fetchError } = await supabaseClient
-        .from("app_settings")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-
-      if (fetchError) {
-        throw fetchError;
+      const res = await authFetch("/api/admin/settings");
+      const result = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(result?.error || "Failed to load settings");
       }
 
-      if (data) {
-        setSettings(data);
+      if (result.item) {
+        setSettings(result.item);
       } else {
         // Initialize with defaults
         setSettings({
@@ -94,14 +91,21 @@ export default function AdminSettingsPage() {
       setSaving(true);
       setError(null);
 
-      const { error: saveError } = await supabaseClient
-        .from("app_settings")
-        .upsert(settings);
-
-      if (saveError) {
-        throw saveError;
+      const res = await authFetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      
+      const result = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(result?.error || "Failed to save settings");
       }
 
+      // Update local state with saved data
+      setSettings(result.item);
+      
       // Show success message
       alert("Settings saved successfully!");
     } catch (err: any) {
