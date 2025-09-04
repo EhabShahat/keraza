@@ -263,75 +263,6 @@ export default function AdminSettingsPage() {
           {/* Settings Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            {/* Administrator Management */}
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800">Administrator Management</h2>
-              </div>
-
-              <div className="space-y-6">
-                {/* Add New Admin */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Add New Administrator</label>
-                  <div className="flex gap-3">
-                    <input
-                      type="email"
-                      value={newAdminEmail}
-                      onChange={(e) => setNewAdminEmail(e.target.value)}
-                      placeholder="admin@example.com"
-                      className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={addingAdmin}
-                    />
-                    <button
-                      onClick={addAdmin}
-                      disabled={addingAdmin || !newAdminEmail.trim()}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-xl transition-colors disabled:cursor-not-allowed"
-                    >
-                      {addingAdmin ? "Adding..." : "Add"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Current Admins */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Current Administrators</label>
-                  {loadingAdmins ? (
-                    <div className="text-center py-4">
-                      <div className="w-6 h-6 mx-auto border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {admins.map((admin) => (
-                        <div key={admin.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                          <div>
-                            <div className="font-medium text-slate-800">{admin.email}</div>
-                            <div className="text-xs text-slate-500">Added {new Date(admin.created_at).toLocaleDateString()}</div>
-                          </div>
-                          <button
-                            onClick={() => removeAdmin(admin.id)}
-                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
-                            title="Remove administrator"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      {admins.length === 0 && (
-                        <div className="text-center py-4 text-slate-500">No administrators found</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            
             {/* System Configuration */}
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
               <div className="flex items-center gap-3 mb-6">
@@ -648,6 +579,75 @@ export default function AdminSettingsPage() {
                       />
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Administrator Management */}
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">Administrator Management</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Add New Admin */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Add New Administrator</label>
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={addingAdmin}
+                    />
+                    <button
+                      onClick={addAdmin}
+                      disabled={addingAdmin || !newAdminEmail.trim()}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-xl transition-colors disabled:cursor-not-allowed"
+                    >
+                      {addingAdmin ? "Adding..." : "Add"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Current Admins */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Current Administrators</label>
+                  {loadingAdmins ? (
+                    <div className="text-center py-4">
+                      <div className="w-6 h-6 mx-auto border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {admins.map((admin) => (
+                        <div key={admin.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div>
+                            <div className="font-medium text-slate-800">{admin.email}</div>
+                            <div className="text-xs text-slate-500">Added {new Date(admin.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <button
+                            onClick={() => removeAdmin(admin.id)}
+                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
+                            title="Remove administrator"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      {admins.length === 0 && (
+                        <div className="text-center py-4 text-slate-500">No administrators found</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

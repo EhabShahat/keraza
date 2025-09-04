@@ -15,8 +15,15 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(url.searchParams.get("limit") || "100", 10), 500);
     const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
 
-    let q = svc.from("audit_logs").select("id, actor, action, meta, created_at").order("created_at", { ascending: false });
-    if (actor) q = q.ilike("actor", `%${actor}%`);
+    let q = svc.from("audit_logs").select(`
+      id, 
+      actor, 
+      action, 
+      meta, 
+      created_at,
+      users!left(email, username)
+    `).order("created_at", { ascending: false });
+    if (actor) q = q.or(`actor.ilike.%${actor}%,users.email.ilike.%${actor}%,users.username.ilike.%${actor}%`);
     if (action) q = q.ilike("action", `%${action}%`);
     if (start) q = q.gte("created_at", start);
     if (end) q = q.lte("created_at", end);
