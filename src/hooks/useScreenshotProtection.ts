@@ -133,46 +133,96 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     }
   }, [enableDevToolsBlocking, showWarning, onScreenshotDetected]);
 
-  // Mobile screenshot detection methods
+  // Advanced mobile screenshot detection methods
   const detectMobileScreenshot = useCallback(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                      'ontouchstart' in window;
     
     if (!isMobile) return;
 
-    // Method 1: Detect volume down + power button combination (Android)
-    let volumeDownPressed = false;
-    let powerButtonPressed = false;
+    // Method 1: Aggressive screenshot detection via multiple signals
+    let lastScreenshotTime = 0;
     
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'VolumeDown' || e.code === 'VolumeDown') {
-        volumeDownPressed = true;
-      }
-      if (e.key === 'Power' || e.code === 'Power') {
-        powerButtonPressed = true;
-      }
+    const detectScreenshotAttempt = () => {
+      const now = Date.now();
+      if (now - lastScreenshotTime < 5000) return; // Avoid spam
       
-      if (volumeDownPressed && powerButtonPressed) {
-        showWarning('Screenshot attempt detected on mobile device!');
-        onScreenshotDetected?.();
+      showWarning('⚠️ Mobile screenshot detected! This activity is being logged.');
+      onScreenshotDetected?.();
+      lastScreenshotTime = now;
+      
+      // Log the violation with detailed info
+      onSuspiciousActivity?.('mobile_screenshot_attempt', {
+        timestamp: now,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        screenSize: `${screen.width}x${screen.height}`,
+        viewportSize: `${window.innerWidth}x${window.innerHeight}`
+      });
+    };
+
+    // Method 2: Detect screenshot via clipboard monitoring
+    const monitorClipboard = async () => {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        try {
+          const clipboardItems = await navigator.clipboard.read();
+          for (const item of clipboardItems) {
+            if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+              showWarning('Screenshot detected in clipboard!');
+              onScreenshotDetected?.();
+              
+              // Clear clipboard
+              try {
+                await navigator.clipboard.writeText('');
+              } catch (e) {
+                // Ignore clipboard clear errors
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore permission errors
+        }
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'VolumeDown' || e.code === 'VolumeDown') {
-        volumeDownPressed = false;
+    // Method 3: Detect rapid focus changes (screenshot notifications)
+    let focusChangeCount = 0;
+    let lastFocusChange = Date.now();
+    
+    const handleFocusChange = () => {
+      const now = Date.now();
+      if (now - lastFocusChange < 300) {
+        focusChangeCount++;
+        if (focusChangeCount >= 3) {
+          showWarning('Mobile screenshot detected!');
+          onScreenshotDetected?.();
+          focusChangeCount = 0;
+        }
+      } else {
+        focusChangeCount = 0;
       }
-      if (e.key === 'Power' || e.code === 'Power') {
-        powerButtonPressed = false;
-      }
+      lastFocusChange = now;
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+    // Start monitoring with multiple detection methods
+    const clipboardInterval = setInterval(monitorClipboard, 1000);
+    
+    // Monitor for various screenshot indicators
+    window.addEventListener('focus', handleFocusChange);
+    window.addEventListener('blur', handleFocusChange);
+    document.addEventListener('visibilitychange', handleFocusChange);
+    
+    // Additional mobile-specific detection
+    document.addEventListener('touchstart', detectScreenshotAttempt, { passive: true });
+    document.addEventListener('touchend', detectScreenshotAttempt, { passive: true });
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
+      clearInterval(clipboardInterval);
+      window.removeEventListener('focus', handleFocusChange);
+      window.removeEventListener('blur', handleFocusChange);
+      document.removeEventListener('visibilitychange', handleFocusChange);
+      document.removeEventListener('touchstart', detectScreenshotAttempt);
+      document.removeEventListener('touchend', detectScreenshotAttempt);
     };
   }, [showWarning, onScreenshotDetected]);
 
@@ -241,7 +291,7 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     };
   }, [showWarning, onScreenshotDetected]);
 
-  // Add CSS-based mobile screenshot protection
+  // Enhanced mobile screenshot protection with multiple layers
   const addMobileScreenshotCSS = useCallback(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                      'ontouchstart' in window;
@@ -252,8 +302,8 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     const style = document.createElement('style');
     style.id = 'mobile-screenshot-protection';
     style.textContent = `
-      /* Prevent screenshot on Android */
-      body {
+      /* Prevent screenshot on Android - FLAG_SECURE simulation */
+      html, body {
         -webkit-touch-callout: none !important;
         -webkit-user-select: none !important;
         -khtml-user-select: none !important;
@@ -261,41 +311,86 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
         -ms-user-select: none !important;
         user-select: none !important;
         -webkit-tap-highlight-color: transparent !important;
+        -webkit-appearance: none !important;
+        background-attachment: fixed !important;
       }
       
-      /* Additional mobile protections */
+      /* Prevent screenshot capture of content */
       * {
         -webkit-touch-callout: none !important;
         -webkit-user-select: none !important;
         user-select: none !important;
-        pointer-events: auto !important;
+        -webkit-appearance: none !important;
+        -webkit-transform: translateZ(0) !important;
+        transform: translateZ(0) !important;
+        will-change: transform !important;
       }
       
-      /* Prevent long press context menu */
-      img, video, canvas {
+      /* Block screenshot sharing and context menus */
+      img, video, canvas, svg {
         -webkit-touch-callout: none !important;
         -webkit-user-select: none !important;
         user-select: none !important;
         pointer-events: none !important;
+        -webkit-appearance: none !important;
+        -webkit-transform: translateZ(0) !important;
+        transform: translateZ(0) !important;
+      }
+      
+      /* Anti-screenshot overlay technique */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: transparent;
+        z-index: 9999;
+        pointer-events: none;
+        mix-blend-mode: difference;
+        opacity: 0.01;
+      }
+      
+      /* Dynamic content protection */
+      .exam-content {
+        -webkit-transform: translateZ(0) !important;
+        transform: translateZ(0) !important;
+        will-change: transform !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
       }
       
       /* Hide content during potential screenshot */
       @media screen and (max-width: 768px) {
         .screenshot-blur {
-          filter: blur(10px) !important;
-          opacity: 0.3 !important;
-          transition: all 0.1s ease !important;
+          filter: blur(20px) brightness(0.3) !important;
+          opacity: 0.1 !important;
+          transition: all 0.05s ease !important;
+          -webkit-transform: scale(0.8) !important;
+          transform: scale(0.8) !important;
+        }
+        
+        .screenshot-hide {
+          visibility: hidden !important;
+          opacity: 0 !important;
+          display: none !important;
         }
       }
     `;
     
     document.head.appendChild(style);
     
+    // Add exam-content class to main content areas
+    const contentElements = document.querySelectorAll('main, .exam-container, [data-exam-content]');
+    contentElements.forEach(el => el.classList.add('exam-content'));
+    
     return () => {
       const existingStyle = document.getElementById('mobile-screenshot-protection');
       if (existingStyle) {
         existingStyle.remove();
       }
+      contentElements.forEach(el => el.classList.remove('exam-content'));
     };
   }, []);
 
@@ -319,11 +414,15 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
           showWarning('Android screenshot detected!');
           onScreenshotDetected?.();
           
-          // Temporarily blur content
+          // Temporarily hide/blur content
           document.body.classList.add('screenshot-blur');
+          const contentElements = document.querySelectorAll('.exam-content, main, [data-exam-content]');
+          contentElements.forEach(el => el.classList.add('screenshot-hide'));
+          
           setTimeout(() => {
             document.body.classList.remove('screenshot-blur');
-          }, 2000);
+            contentElements.forEach(el => el.classList.remove('screenshot-hide'));
+          }, 3000);
           
           visibilityChangeCount = 0;
         }

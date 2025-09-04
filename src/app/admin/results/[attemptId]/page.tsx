@@ -103,6 +103,25 @@ export default function AdminAttemptDetails() {
             <div><span className="text-gray-600">Started:</span> {metaQ.data.started_at ?? "-"}</div>
             <div><span className="text-gray-600">Submitted:</span> {metaQ.data.submitted_at ?? "-"}</div>
             <div><span className="text-gray-600">Latest IP:</span> {metaQ.data.ip_address ?? "-"}</div>
+            {stateQ.data && (() => {
+              const questions = Array.isArray(stateQ.data?.questions) ? stateQ.data.questions : [];
+              const answers = stateQ.data?.answers ?? {};
+              let correctCount = 0;
+              let totalGradable = 0;
+              
+              questions.forEach((q: any) => {
+                const ans = answers[q.id];
+                const correct = isCorrect(q, ans);
+                if (correct !== null) {
+                  totalGradable++;
+                  if (correct) correctCount++;
+                }
+              });
+              
+              return totalGradable > 0 ? (
+                <div><span className="text-gray-600">Score:</span> <span className="font-semibold">{correctCount} of {totalGradable} correct</span></div>
+              ) : null;
+            })()}
           </div>
           {Array.isArray(metaQ.data.ips) && metaQ.data.ips.length > 0 && (
             <div className="mt-3">
@@ -114,10 +133,21 @@ export default function AdminAttemptDetails() {
               </ul>
             </div>
           )}
+          
+          {stateQ.data && (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                Per-question responses
+              </summary>
+              <div className="mt-3">
+                <PerQuestionTable state={stateQ.data} />
+              </div>
+            </details>
+          )}
         </div>
       )}
 
-      {metaQ.data?.device_info && (() => {
+      {metaQ.data && (() => {
         const di: any = metaQ.data.device_info || {};
         const parsed = di?.parsed || {};
         const browser = parsed.browser || {};
@@ -147,52 +177,67 @@ export default function AdminAttemptDetails() {
           return `${pick(tz)} (UTC${hh}${mm})`;
         })();
 
+        const hasDeviceInfo = Object.keys(di).length > 0;
+
         return (
-          <div className="bg-white border rounded p-3">
-            <h2 className="font-semibold mb-2">Device Info</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-              <div><span className="text-gray-600">Browser:</span> {([browser.name, browser.version].filter(Boolean).join(" ")) || "-"}</div>
-              <div><span className="text-gray-600">OS:</span> {([os.name, os.version].filter(Boolean).join(" ")) || "-"}</div>
-              <div><span className="text-gray-600">Device Type:</span> {pick(device.type ?? (uaData?.mobile === true ? "mobile" : null))}</div>
-              <div><span className="text-gray-600">Device Brand:</span> {pick(oem?.brand)}</div>
-              <div><span className="text-gray-600">Device Model:</span> {pick(oem?.model)}</div>
-              <div><span className="text-gray-600">Submit Clicks:</span> {pick(sub?.count)}</div>
-              <div><span className="text-gray-600">First Click At:</span> {pick(sub?.firstAt)}</div>
-              <div><span className="text-gray-600">Last Click At:</span> {pick(sub?.lastAt)}</div>
+          <details className="bg-white border rounded">
+            <summary className="p-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+              <h2 className="font-semibold">Device Info</h2>
+              <span className="text-xs text-gray-500">
+                {hasDeviceInfo ? 'Click to expand' : 'No device info recorded'}
+              </span>
+            </summary>
+            <div className="px-3 pb-3 border-t">
+              {hasDeviceInfo ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                    <div><span className="text-gray-600">Browser:</span> {([browser.name, browser.version].filter(Boolean).join(" ")) || "-"}</div>
+                    <div><span className="text-gray-600">OS:</span> {([os.name, os.version].filter(Boolean).join(" ")) || "-"}</div>
+                    <div><span className="text-gray-600">Device Type:</span> {pick(device.type ?? (uaData?.mobile === true ? "mobile" : null))}</div>
+                    <div><span className="text-gray-600">Device Brand:</span> {pick(oem?.brand)}</div>
+                    <div><span className="text-gray-600">Device Model:</span> {pick(oem?.model)}</div>
+                    <div><span className="text-gray-600">Submit Clicks:</span> {pick(sub?.count)}</div>
+                    <div><span className="text-gray-600">First Click At:</span> {pick(sub?.firstAt)}</div>
+                    <div><span className="text-gray-600">Last Click At:</span> {pick(sub?.lastAt)}</div>
 
-              <div><span className="text-gray-600">Language:</span> {pick(di?.language)}</div>
-              <div><span className="text-gray-600">Languages:</span> {Array.isArray(di?.languages) ? di.languages.join(", ") : "-"}</div>
-              <div><span className="text-gray-600">Timezone:</span> {tzStr}</div>
+                    <div><span className="text-gray-600">Language:</span> {pick(di?.language)}</div>
+                    <div><span className="text-gray-600">Languages:</span> {Array.isArray(di?.languages) ? di.languages.join(", ") : "-"}</div>
+                    <div><span className="text-gray-600">Timezone:</span> {tzStr}</div>
 
-              <div><span className="text-gray-600">Screen:</span> {s.width && s.height ? `${s.width}x${s.height}` : "-"}</div>
-              <div><span className="text-gray-600">Viewport:</span> {vp?.width && vp?.height ? `${vp.width}x${vp.height}` : "-"}</div>
-              <div><span className="text-gray-600">Orientation:</span> {ori?.type || "-"}{typeof ori?.angle === "number" ? ` (${ori.angle}°)` : ""}</div>
+                    <div><span className="text-gray-600">Screen:</span> {s.width && s.height ? `${s.width}x${s.height}` : "-"}</div>
+                    <div><span className="text-gray-600">Viewport:</span> {vp?.width && vp?.height ? `${vp.width}x${vp.height}` : "-"}</div>
+                    <div><span className="text-gray-600">Orientation:</span> {ori?.type || "-"}{typeof ori?.angle === "number" ? ` (${ori.angle}°)` : ""}</div>
 
-              <div><span className="text-gray-600">Pixel Ratio:</span> {pick(di?.pixelRatio)}</div>
-              <div><span className="text-gray-600">Color Depth:</span> {pick(s?.colorDepth)}</div>
-              <div><span className="text-gray-600">Pixel Depth:</span> {pick(s?.pixelDepth)}</div>
+                    <div><span className="text-gray-600">Pixel Ratio:</span> {pick(di?.pixelRatio)}</div>
+                    <div><span className="text-gray-600">Color Depth:</span> {pick(s?.colorDepth)}</div>
+                    <div><span className="text-gray-600">Pixel Depth:</span> {pick(s?.pixelDepth)}</div>
 
-              <div><span className="text-gray-600">CPU Threads:</span> {pick(di?.hardwareConcurrency)}</div>
-              <div><span className="text-gray-600">Memory:</span> {typeof di?.deviceMemory === "number" ? `${di.deviceMemory} GB` : "-"}</div>
-              <div><span className="text-gray-600">Touch:</span> {fmtBool(di?.touch)}</div>
+                    <div><span className="text-gray-600">CPU Threads:</span> {pick(di?.hardwareConcurrency)}</div>
+                    <div><span className="text-gray-600">Memory:</span> {typeof di?.deviceMemory === "number" ? `${di.deviceMemory} GB` : "-"}</div>
+                    <div><span className="text-gray-600">Touch:</span> {fmtBool(di?.touch)}</div>
 
-              <div className="md:col-span-2"><span className="text-gray-600">GPU:</span> {gpu?.vendor || gpu?.renderer ? `${gpu.vendor || ""}${gpu.vendor && gpu.renderer ? " · " : ""}${gpu.renderer || ""}` : "-"}</div>
-              <div><span className="text-gray-600">Network:</span> {net?.effectiveType || net?.type ? `${net.effectiveType || net.type}${typeof net.downlink === "number" ? ` · ${fmtNum(net.downlink, 1)} Mb/s` : ""}${typeof net.rtt === "number" ? ` · ${fmtNum(net.rtt)} ms` : ""}${typeof net.saveData === "boolean" ? ` · saveData ${fmtBool(net.saveData)}` : ""}` : "-"}</div>
+                    <div className="md:col-span-2"><span className="text-gray-600">GPU:</span> {gpu?.vendor || gpu?.renderer ? `${gpu.vendor || ""}${gpu.vendor && gpu.renderer ? " · " : ""}${gpu.renderer || ""}` : "-"}</div>
+                    <div><span className="text-gray-600">Network:</span> {net?.effectiveType || net?.type ? `${net.effectiveType || net.type}${typeof net.downlink === "number" ? ` · ${fmtNum(net.downlink, 1)} Mb/s` : ""}${typeof net.rtt === "number" ? ` · ${fmtNum(net.rtt)} ms` : ""}${typeof net.saveData === "boolean" ? ` · saveData ${fmtBool(net.saveData)}` : ""}` : "-"}</div>
 
-              <div><span className="text-gray-600">Battery:</span> {(typeof bat?.level === "number" || typeof bat?.charging === "boolean") ? `${typeof bat.level === "number" ? fmtPct(bat.level) : ""}${typeof bat.level === "number" && typeof bat.charging === "boolean" ? " · " : ""}${typeof bat.charging === "boolean" ? (bat.charging ? "Charging" : "Not charging") : ""}` : "-"}</div>
-              <div><span className="text-gray-600">Storage:</span> {stor?.usage || stor?.quota ? `${fmtBytes(stor.usage)} / ${fmtBytes(stor.quota)}` : "-"}</div>
+                    <div><span className="text-gray-600">Battery:</span> {(typeof bat?.level === "number" || typeof bat?.charging === "boolean") ? `${typeof bat.level === "number" ? fmtPct(bat.level) : ""}${typeof bat.level === "number" && typeof bat.charging === "boolean" ? " · " : ""}${typeof bat.charging === "boolean" ? (bat.charging ? "Charging" : "Not charging") : ""}` : "-"}</div>
+                    <div><span className="text-gray-600">Storage:</span> {stor?.usage || stor?.quota ? `${fmtBytes(stor.usage)} / ${fmtBytes(stor.quota)}` : "-"}</div>
 
-              <div className="md:col-span-3"><span className="text-gray-600">UA-CH Brands:</span> {joinBrands(uaData?.brands)}</div>
-              <div className="md:col-span-3"><span className="text-gray-600">User Agent:</span> {pick(di?.userAgent)}</div>
-              <div><span className="text-gray-600">Platform (navigator):</span> {pick(di?.platform)}</div>
-              <div><span className="text-gray-600">Vendor:</span> {pick(di?.vendor)}</div>
-              <div><span className="text-gray-600">Collected At:</span> {pick(di?.collectedAt)}</div>
+                    <div className="md:col-span-3"><span className="text-gray-600">UA-CH Brands:</span> {joinBrands(uaData?.brands)}</div>
+                    <div className="md:col-span-3"><span className="text-gray-600">User Agent:</span> {pick(di?.userAgent)}</div>
+                    <div><span className="text-gray-600">Platform (navigator):</span> {pick(di?.platform)}</div>
+                    <div><span className="text-gray-600">Vendor:</span> {pick(di?.vendor)}</div>
+                    <div><span className="text-gray-600">Collected At:</span> {pick(di?.collectedAt)}</div>
+                  </div>
+                  <details className="mt-3">
+                    <summary className="text-sm text-gray-600 cursor-pointer">Show raw JSON</summary>
+                    <pre className="text-xs whitespace-pre-wrap mt-2">{JSON.stringify(metaQ.data.device_info, null, 2)}</pre>
+                  </details>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">No device information was recorded for this attempt.</p>
+              )}
             </div>
-            <details className="mt-3">
-              <summary className="text-sm text-gray-600 cursor-pointer">Show raw JSON</summary>
-              <pre className="text-xs whitespace-pre-wrap mt-2">{JSON.stringify(metaQ.data.device_info, null, 2)}</pre>
-            </details>
-          </div>
+          </details>
         );
       })()}
 
@@ -204,11 +249,14 @@ export default function AdminAttemptDetails() {
           );
         const items = Array.isArray(actQ.data) ? (actQ.data as any[]) : [];
         return (
-          <div className="bg-white border rounded p-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold mb-2">Activity</h2>
-              <span className="text-xs text-gray-500">{items.length} events</span>
-            </div>
+          <details className="bg-white border rounded">
+            <summary className="p-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+              <h2 className="font-semibold">Activity Timeline</h2>
+              <span className="text-xs text-gray-500">
+                {items.length} events recorded
+              </span>
+            </summary>
+            <div className="px-3 pb-3 border-t">
             {(() => {
               const counts = items.reduce((acc: Record<string, number>, ev: any) => {
                 const k = String(ev?.event_type || "unknown");
@@ -338,15 +386,10 @@ export default function AdminAttemptDetails() {
                 </table>
               </div>
             )}
-          </div>
+            </div>
+          </details>
         );
       })()}
-      {stateQ.data && (
-        <div className="bg-white border rounded p-3">
-          <h2 className="font-semibold mb-2">Per-question responses</h2>
-          <PerQuestionTable state={stateQ.data} />
-        </div>
-      )}
 
       {stateQ.data && (
         <div className="bg-white border rounded p-3 overflow-auto">
@@ -416,10 +459,10 @@ function toStringArray(v: unknown): string[] {
   return v.map((x) => normStr(x));
 }
 function arraysEqualIgnoreOrder(a: unknown, b: unknown) {
-  const aa = toStringArray(a).slice().sort();
-  const bb = toStringArray(b).slice().sort();
-  if (aa.length !== bb.length) return false;
-  for (let i = 0; i < aa.length; i++) if (aa[i] !== bb[i]) return false;
+  const arrA = toStringArray(a).slice().sort();
+  const arrB = toStringArray(b).slice().sort();
+  if (arrA.length !== arrB.length) return false;
+  for (let i = 0; i < arrA.length; i++) if (arrA[i] !== arrB[i]) return false;
   return true;
 }
 function isCorrect(question: any, answer: unknown): boolean | null {
