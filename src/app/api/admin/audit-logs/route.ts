@@ -33,8 +33,8 @@ export async function GET(req: NextRequest) {
     const { data: auditData, error: auditError } = await auditQuery.range(offset, offset + limit - 1);
     if (auditError) return NextResponse.json({ error: auditError.message }, { status: 400 });
 
-    // Get unique user IDs
-    const userIds = [...new Set(auditData?.map(log => log.user_id).filter(Boolean) || [])];
+    // Get unique user IDs from actor field (since actor contains user IDs)
+    const userIds = [...new Set(auditData?.map(log => log.actor).filter(Boolean) || [])];
     
     // Fetch user data separately from auth.users
     let userData: any[] = [];
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     // Merge the data
     const enrichedData = auditData?.map(log => ({
       ...log,
-      users: log.user_id ? userData.find(user => user.id === log.user_id) : null
+      users: userData.find(user => user.id === log.actor) || null
     })) || [];
 
     return NextResponse.json({ items: enrichedData });
