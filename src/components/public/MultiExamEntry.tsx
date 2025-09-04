@@ -35,6 +35,7 @@ export default function MultiExamEntry() {
   const [startingExamId, setStartingExamId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
   const [codeSettings, setCodeSettings] = useState<CodeFormatSettings | null>(null);
+  const [isMultiExamMode, setIsMultiExamMode] = useState<boolean>(true);
 
   // Track current ?code value from URL
   const codeParam = useMemo(() => (searchParams?.get("code") || "").trim(), [searchParams]);
@@ -47,6 +48,7 @@ export default function MultiExamEntry() {
         if (res.ok) {
           const settings = await res.json();
           setCodeSettings(settings);
+          setIsMultiExamMode(settings.enable_multi_exam ?? true);
         }
       } catch (error) {
         console.warn("Failed to fetch code settings, using defaults");
@@ -54,7 +56,9 @@ export default function MultiExamEntry() {
           code_length: 4,
           code_format: "numeric",
           code_pattern: null,
+          enable_multi_exam: true,
         });
+        setIsMultiExamMode(true);
       }
     }
     void fetchCodeSettings();
@@ -172,7 +176,7 @@ export default function MultiExamEntry() {
 
   async function verifyCode(nextCode?: string) {
     const c = (nextCode ?? code).trim();
-    if (!/^\d{4}$/.test(c)) {
+    if (!isValidCode(c)) {
       setError(t(locale, "code_must_be_4_digits"));
       return;
     }
@@ -188,6 +192,16 @@ export default function MultiExamEntry() {
       const data = await res.json();
       const items: ByCodeExamItem[] = data?.exams || [];
       setStudentName(data?.student_name || null);
+      
+      // In single exam mode, if there's exactly one exam, go directly to it
+      if (!isMultiExamMode && items.length === 1) {
+        const exam = items[0];
+        if (exam.is_active && !exam.not_started && !exam.ended && exam.attempt_status !== "completed") {
+          await startOrContinueExam(exam.id);
+          return;
+        }
+      }
+      
       setExams(items);
     } catch {
       setError(t(locale, "error_loading_results"));
@@ -198,7 +212,7 @@ export default function MultiExamEntry() {
 
   async function startOrContinueExam(examId: string) {
     const c = code.trim();
-    if (!/^\d{4}$/.test(c)) return;
+    if (!isValidCode(c)) return;
 
     setStartingExamId(examId);
     setError(null);

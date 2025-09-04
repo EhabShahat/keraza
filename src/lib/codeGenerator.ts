@@ -4,6 +4,7 @@ export interface CodeFormatSettings {
   code_length: number;
   code_format: "numeric" | "alphabetic" | "alphanumeric" | "custom";
   code_pattern?: string | null;
+  enable_multi_exam?: boolean;
 }
 
 export async function getCodeFormatSettings(): Promise<CodeFormatSettings> {
@@ -11,7 +12,7 @@ export async function getCodeFormatSettings(): Promise<CodeFormatSettings> {
     const svc = supabaseServer();
     const { data, error } = await svc
       .from("app_settings")
-      .select("code_length, code_format, code_pattern")
+      .select("code_length, code_format, code_pattern, enable_multi_exam")
       .limit(1)
       .maybeSingle();
 
@@ -23,6 +24,7 @@ export async function getCodeFormatSettings(): Promise<CodeFormatSettings> {
       code_length: data?.code_length ?? 4,
       code_format: data?.code_format ?? "numeric",
       code_pattern: data?.code_pattern ?? null,
+      enable_multi_exam: data?.enable_multi_exam ?? true,
     };
   } catch (error) {
     console.warn("Error fetching code format settings, using defaults:", error);
@@ -30,6 +32,7 @@ export async function getCodeFormatSettings(): Promise<CodeFormatSettings> {
       code_length: 4,
       code_format: "numeric",
       code_pattern: null,
+      enable_multi_exam: true,
     };
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getBearerToken } from "@/lib/admin";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getCodeFormatSettings } from "@/lib/codeGenerator";
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ examId: string }> }) {
   try {
@@ -18,7 +19,25 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ examId: st
     if (q.error) return NextResponse.json({ error: q.error.message }, { status: 400 });
     if ((q.count ?? 0) < 1) return NextResponse.json({ error: "no_questions" }, { status: 400 });
 
-    // Multiple published exams are allowed; do not auto-archive other exams.
+    // Check if we're in single exam mode and enforce only one published exam
+    const settings = await getCodeFormatSettings();
+    if (!settings.enable_multi_exam) {
+      // In single exam mode, check if there are any other published exams
+      const publishedExams = await svc
+        .from("exams")
+        .select("id")
+        .eq("status", "published")
+        .neq("id", examId);
+      
+      if (publishedExams.error) return NextResponse.json({ error: publishedExams.error.message }, { status: 400 });
+      
+      if (publishedExams.data && publishedExams.data.length > 0) {
+        return NextResponse.json({ 
+          error: "single_exam_mode_restriction", 
+          message: "Only one exam can be published in single exam mode. Please archive other published exams first." 
+        }, { status: 400 });
+      }
+    }
 
     const upd = await svc
       .from("exams")
