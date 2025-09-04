@@ -585,70 +585,114 @@ export default function AdminSettingsPage() {
 
             {/* Administrator Management */}
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              <div className="mb-10">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-3 flex items-center gap-3">
+                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800">Administrator Management</h2>
+                  Administrator Management
+                </h2>
+                <p className="text-gray-500 text-md ml-9">Manage users who have administrative access to the system</p>
               </div>
 
-              <div className="space-y-6">
-                {/* Add New Admin */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Add New Administrator</label>
-                  <div className="flex gap-3">
+              {/* Account Management Interface */}
+              <div className="bg-white rounded-xl p-8 mb-10 shadow-sm border border-gray-100">
+                <h3 className="text-lg font-medium text-gray-800 mb-6 flex items-center gap-3">
+                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  Create New Admin Account
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
                     <input
-                      type="email"
+                      type="text"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="Username (optional)"
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
-                      placeholder="admin@example.com"
-                      className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      disabled={addingAdmin}
                     />
-                    <button
-                      onClick={addAdmin}
-                      disabled={addingAdmin || !newAdminEmail.trim()}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-xl transition-colors disabled:cursor-not-allowed"
-                    >
-                      {addingAdmin ? "Adding..." : "Add"}
-                    </button>
+                  </div>
+                  <div>
+                    <input
+                      type="email"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="Email address"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="password"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="Password (min 8 characters)"
+                      disabled
+                    />
                   </div>
                 </div>
-
-                {/* Current Admins */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Current Administrators</label>
-                  {loadingAdmins ? (
-                    <div className="text-center py-4">
-                      <div className="w-6 h-6 mx-auto border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {admins.map((admin) => (
-                        <div key={admin.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                          <div>
-                            <div className="font-medium text-slate-800">{admin.email}</div>
-                            <div className="text-xs text-slate-500">Added {new Date(admin.created_at).toLocaleDateString()}</div>
-                          </div>
-                          <button
-                            onClick={() => removeAdmin(admin.id)}
-                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
-                            title="Remove administrator"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      {admins.length === 0 && (
-                        <div className="text-center py-4 text-slate-500">No administrators found</div>
-                      )}
-                    </div>
-                  )}
+                <div className="flex justify-end">
+                  <button
+                    onClick={addAdmin}
+                    disabled={addingAdmin || !newAdminEmail.trim()}
+                    className="px-8 py-3 rounded-xl text-md font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-md bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white disabled:cursor-not-allowed"
+                  >
+                    {addingAdmin ? "Creating..." : "Create Admin Account"}
+                  </button>
                 </div>
+              </div>
+
+              {/* Admins Table */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                {loadingAdmins ? (
+                  <div className="text-center py-8">
+                    <div className="w-6 h-6 mx-auto border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Added</th>
+                          <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {admins.map((admin) => (
+                          <tr key={admin.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4">
+                              <div className="font-medium text-gray-900">{admin.email}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-500">
+                                {new Date(admin.created_at).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                onClick={() => removeAdmin(admin.id)}
+                                className="text-red-600 hover:text-red-800 p-2 rounded transition-colors"
+                                title="Remove administrator"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {admins.length === 0 && (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                              No administrators found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>

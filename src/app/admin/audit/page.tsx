@@ -16,10 +16,6 @@ interface AuditLog {
   meta: any;
   resource_type?: string;
   resource_id?: string;
-  users?: {
-    email: string;
-    username: string;
-  } | null;
 }
 
 export default function AdminAuditPage() {
@@ -120,19 +116,9 @@ export default function AdminAuditPage() {
           </div>
         );
       case "actor":
-        const displayName = log.users?.username || log.users?.email || log.actor;
-        const isSystemActor = !log.users;
         return (
           <div className="text-sm">
-            <div className="font-medium text-gray-900">{displayName}</div>
-            {isSystemActor && (
-              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1 inline-block">
-                System
-              </div>
-            )}
-            {log.users && log.users.username && log.users.email && (
-              <div className="text-xs text-gray-500">{log.users.email}</div>
-            )}
+            <div className="font-medium text-gray-900">{log.actor}</div>
           </div>
         );
       case "action":
