@@ -3,118 +3,84 @@
 import { useEffect, useState, useCallback } from 'react';
 
 interface ScreenshotProtectionOptions {
-  onScreenshotDetected?: () => void;
   onSuspiciousActivity?: (activity: string, details?: any) => void;
   onTabSwitch?: (details: { hidden: boolean; timestamp: number }) => void;
   onDeviceDetected?: (devices: any[]) => void;
-  enableKeyboardBlocking?: boolean;
-  enableRightClickBlocking?: boolean;
-  enableDevToolsBlocking?: boolean;
   enableTabSwitchDetection?: boolean;
   enableDeviceScanning?: boolean;
 }
 
 export function useScreenshotProtection(options: ScreenshotProtectionOptions = {}) {
-  const [isProtected, setIsProtected] = useState(false);
   const [warningVisible, setWarningVisible] = useState(false);
   const [suspiciousActivity, setSuspiciousActivity] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
 
   const {
-    onScreenshotDetected,
     onSuspiciousActivity,
     onTabSwitch,
     onDeviceDetected,
-    enableKeyboardBlocking = true,
-    enableRightClickBlocking = true,
-    enableDevToolsBlocking = true,
     enableTabSwitchDetection = true,
     enableDeviceScanning = true,
   } = options;
 
-  const showWarning = useCallback((message: string) => {
-    setSuspiciousActivity(message);
-    setWarningVisible(true);
-    onSuspiciousActivity?.(message);
-    
-    // Auto-hide warning after 5 seconds
-    setTimeout(() => {
-      setWarningVisible(false);
-      setSuspiciousActivity(null);
-    }, 5000);
-  }, [onSuspiciousActivity]);
+  // Tab switch detection only (no screenshot protection)
+  useEffect(() => {
+    if (!enableTabSwitchDetection) return;
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (!enableKeyboardBlocking) return;
-
-    // Block common screenshot shortcuts
-    const blockedKeys = [
-      // Windows screenshot shortcuts
-      { key: 'PrintScreen', message: 'Screenshot attempt detected!' },
-      { key: 'F2', message: 'Screenshot attempt detected!' }, // Some devices use F2
-      { key: 'F12', message: 'Developer tools blocked!' },
-      // Windows + Print Screen combinations
-      { key: 'PrintScreen', meta: true, message: 'Screenshot attempt detected!' },
-      { key: 'PrintScreen', alt: true, message: 'Screenshot attempt detected!' },
-      // Mac screenshot shortcuts
-      { key: 's', meta: true, shift: true, message: 'Screenshot attempt detected!' },
-      { key: '3', meta: true, shift: true, message: 'Screenshot attempt detected!' },
-      { key: '4', meta: true, shift: true, message: 'Screenshot attempt detected!' },
-      { key: '5', meta: true, shift: true, message: 'Screenshot attempt detected!' },
-      // Additional Windows shortcuts
-      { key: 's', meta: true, shift: true, message: 'Screenshot attempt detected!' }, // Win+Shift+S
-      // Developer tools shortcuts
-      { key: 'F12', message: 'Developer tools blocked!' },
-      { key: 'i', ctrl: true, shift: true, message: 'Developer tools blocked!' },
-      { key: 'j', ctrl: true, shift: true, message: 'Developer tools blocked!' },
-      { key: 'c', ctrl: true, shift: true, message: 'Developer tools blocked!' },
-      { key: 'u', ctrl: true, message: 'View source blocked!' },
-      // Mac developer tools
-      { key: 'i', meta: true, alt: true, message: 'Developer tools blocked!' },
-      { key: 'j', meta: true, alt: true, message: 'Developer tools blocked!' },
-      { key: 'c', meta: true, alt: true, message: 'Developer tools blocked!' },
-      { key: 'u', meta: true, alt: true, message: 'View source blocked!' },
-    ];
-
-    for (const blocked of blockedKeys) {
-      const keyMatch = e.key === blocked.key || e.code === blocked.key;
-      const metaMatch = blocked.meta ? e.metaKey : !e.metaKey;
-      const ctrlMatch = blocked.ctrl ? e.ctrlKey : !e.ctrlKey;
-      const shiftMatch = blocked.shift ? e.shiftKey : !e.shiftKey;
-      const altMatch = blocked.alt ? e.altKey : !e.altKey;
-
-      if (keyMatch && metaMatch && ctrlMatch && shiftMatch && altMatch) {
-        e.preventDefault();
-        e.stopPropagation();
-        showWarning(blocked.message);
-        onScreenshotDetected?.();
-        return false;
+    const handleVisibilityChange = () => {
+      const isHidden = document.hidden;
+      const timestamp = Date.now();
+      
+      onTabSwitch?.({ hidden: isHidden, timestamp });
+      
+      if (isHidden) {
+        onSuspiciousActivity?.('Tab switched away from exam', { timestamp });
       }
-    }
-  }, [enableKeyboardBlocking, showWarning, onScreenshotDetected]);
+    };
 
-  const handleRightClick = useCallback((e: MouseEvent) => {
-    if (!enableRightClickBlocking) return;
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    e.preventDefault();
-    e.stopPropagation();
-    showWarning('Right-click is disabled during the exam!');
-    return false;
-  }, [enableRightClickBlocking, showWarning]);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [enableTabSwitchDetection, onTabSwitch, onSuspiciousActivity]);
 
-  const handleSelectStart = useCallback((e: Event) => {
-    e.preventDefault();
-    return false;
+  // Device scanning (if enabled)
+  useEffect(() => {
+    if (!enableDeviceScanning) return;
+
+    const scanDevices = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        onDeviceDetected?.(devices);
+      } catch (error) {
+        // Device scanning failed - this is normal in many browsers
+      }
+    };
+
+    scanDevices();
+  }, [enableDeviceScanning, onDeviceDetected]);
+
+  const disable = useCallback(() => {
+    setIsActive(false);
+    setWarningVisible(false);
+    setSuspiciousActivity(null);
   }, []);
 
-  const handleDragStart = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    return false;
+  const enable = useCallback(() => {
+    setIsActive(true);
   }, []);
 
-  // Detect developer tools opening
-  const detectDevTools = useCallback(() => {
-    if (!enableDevToolsBlocking) return;
+  return {
+    isActive,
+    warningVisible,
+    suspiciousActivity,
+    disable,
+    enable,
+    // Removed all screenshot protection functionality
+    WarningComponent: null
+  };
+}
 
     // Skip detection on mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
