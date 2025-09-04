@@ -2,18 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-<<<<<<< HEAD
 import { useState, useEffect, type ReactNode } from "react";
 import AdminGuard from "@/components/AdminGuard/index";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-=======
-import { useState, useEffect } from "react";
-import ToastProvider from "@/components/ToastProvider";
-import AdminGuard from "@/components/AdminGuard/index";
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -25,13 +17,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminGuard>
       <a href="#main-content" className="skip-link">Skip to content</a>
-<<<<<<< HEAD
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-=======
       <div className="min-h-screen min-h-[100svh] bg-gray-50">
         <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 safe-area-top">
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-8">
@@ -86,10 +73,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                   {/* Admin Group */}
                   <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
-<<<<<<< HEAD
-=======
-
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
                     <NavLink href="/admin/audit">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -206,11 +189,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 }
 
-<<<<<<< HEAD
 function NavLink({ href, children, exact = false }: { href: string; children: ReactNode; exact?: boolean }) {
-=======
-function NavLink({ href, children, exact = false }: { href: string; children: React.ReactNode; exact?: boolean }) {
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   const pathname = usePathname();
   const isActive = exact ? pathname === href : pathname.startsWith(href);
 
@@ -229,11 +208,7 @@ function NavLink({ href, children, exact = false }: { href: string; children: Re
   );
 }
 
-<<<<<<< HEAD
 function MobileNavLink({ href, children, exact = false }: { href: string; children: ReactNode; exact?: boolean }) {
-=======
-function MobileNavLink({ href, children, exact = false }: { href: string; children: React.ReactNode; exact?: boolean }) {
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   const pathname = usePathname();
   const isActive = exact ? pathname === href : pathname.startsWith(href);
 
@@ -253,12 +228,8 @@ function MobileNavLink({ href, children, exact = false }: { href: string; childr
 }
 
 function SystemStatusIndicator() {
-<<<<<<< HEAD
   type Mode = 'exam' | 'results' | 'disabled';
   const [systemMode, setSystemMode] = useState<Mode>('exam');
-=======
-  const [systemMode, setSystemMode] = useState<'exam' | 'results' | 'disabled'>('exam');
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
   // Fetch system status
   useEffect(() => {
@@ -280,11 +251,7 @@ function SystemStatusIndicator() {
     return () => clearInterval(interval);
   }, []);
 
-<<<<<<< HEAD
   const statusConfig: Record<Mode, { bg: string; text: string; dotColor: string; label: string }> = {
-=======
-  const statusConfig = {
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     exam: {
       bg: 'bg-green-50',
       text: 'text-green-700',
@@ -314,7 +281,3 @@ function SystemStatusIndicator() {
     </div>
   );
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a

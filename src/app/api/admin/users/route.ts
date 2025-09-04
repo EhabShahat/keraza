@@ -55,25 +55,20 @@ export async function POST(req: NextRequest) {
 
     console.log("[API] /api/admin/users - success", { created_user_id: item?.user_id || null });
 
-<<<<<<< HEAD
     // Ensure admin_users row exists when is_admin is requested
     if (is_admin && item?.user_id) {
       try {
-        const ensure = await svc
+        const { error: adminError } = await svc
           .from("admin_users")
-          .upsert({ user_id: item.user_id, email: item?.email ?? null }, { onConflict: "user_id" });
-        if (ensure.error) {
-          console.error("[API] /api/admin/users - ensure admin_users upsert error", ensure.error);
-        } else {
-          console.log("[API] /api/admin/users - ensured admin_users entry", { user_id: item.user_id });
+          .upsert({ user_id: item.user_id }, { onConflict: "user_id" });
+        if (adminError) {
+          console.error("[API] /api/admin/users - admin_users upsert failed:", adminError);
         }
-      } catch (e) {
-        console.error("[API] /api/admin/users - ensure admin_users unexpected error", e);
+      } catch (adminErr) {
+        console.error("[API] /api/admin/users - admin_users upsert exception:", adminErr);
       }
     }
 
-=======
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     try {
       await auditLog(actor.username || actor.email || actor.user_id, "admin_create_user", {
         username: username || null,

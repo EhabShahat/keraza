@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 
 import { useState, useEffect } from "react";
@@ -375,10 +374,4 @@ export default function DebugPage() {
       </div>
     </div>
   );
-=======
-import { notFound } from "next/navigation";
-
-export default function DebugPage() {
-  notFound();
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 }

@@ -18,17 +18,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ examId: st
     if (q.error) return NextResponse.json({ error: q.error.message }, { status: 400 });
     if ((q.count ?? 0) < 1) return NextResponse.json({ error: "no_questions" }, { status: 400 });
 
-<<<<<<< HEAD
-    // Unpublish any other active exam to enforce single active exam at a time
-    const unpub = await svc
-      .from("exams")
-      .update({ status: "archived" })
-      .eq("status", "published")
-      .neq("id", examId);
-    if (unpub.error) return NextResponse.json({ error: unpub.error.message }, { status: 400 });
-=======
     // Multiple published exams are allowed; do not auto-archive other exams.
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
     const upd = await svc
       .from("exams")

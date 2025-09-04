@@ -13,8 +13,6 @@ export async function POST(
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-<<<<<<< HEAD
-=======
     // Ensure per-student per-exam tracker reflects completion (used by by-code listing UI)
     try {
       const { error: updErr } = await supabase
@@ -30,8 +28,6 @@ export async function POST(
       console.error("Failed to update student_exam_attempts status to completed:", e);
       // Non-fatal: proceed to return submission summary
     }
-
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     const row = Array.isArray(data) ? data[0] : data;
     return NextResponse.json({
       total_questions: row?.total_questions ?? 0,

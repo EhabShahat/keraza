@@ -24,19 +24,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ examId: s
     const token = await getBearerToken(req);
     const svc = supabaseServer(token || undefined);
 
-<<<<<<< HEAD
-    // If updating to published, archive any other published exams first
-    if (body && body.status === "published") {
-      const unpub = await svc
-        .from("exams")
-        .update({ status: "archived" })
-        .eq("status", "published")
-        .neq("id", examId);
-      if (unpub.error) return NextResponse.json({ error: unpub.error.message }, { status: 400 });
-    }
-=======
     // Multiple published exams are allowed; do not auto-archive other exams on update.
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
     const { data, error } = await svc
       .from("exams")

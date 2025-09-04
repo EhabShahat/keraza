@@ -35,13 +35,8 @@ function ResultItem({ result }: ResultItemProps) {
   const passBadge = useMemo(() => {
     if (result.is_pass === true) {
       return (
-<<<<<<< HEAD
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
           </svg>
           PASS
@@ -50,13 +45,8 @@ function ResultItem({ result }: ResultItemProps) {
     }
     if (result.is_pass === false) {
       return (
-<<<<<<< HEAD
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
           FAIL
@@ -76,11 +66,7 @@ function ResultItem({ result }: ResultItemProps) {
   return (
     <li className="py-4" key={result.id}>
       <div className="flex items-start justify-between">
-<<<<<<< HEAD
-        <div className="pr-4">
-=======
         <div style={{ paddingInlineEnd: '1rem' }}>
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           <div className="font-semibold text-gray-900">{result.exam_title}</div>
           <div className="text-sm text-gray-500">{submittedAtText}</div>
         </div>

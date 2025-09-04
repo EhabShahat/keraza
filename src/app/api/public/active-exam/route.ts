@@ -4,59 +4,12 @@ import { supabaseServer } from "@/lib/supabase/server";
 export async function GET(req: NextRequest) {
   try {
     const svc = supabaseServer();
-    
-<<<<<<< HEAD
-    // Look for the single active (published) exam
-=======
+
     // Fetch all published exams (multiple published exams are allowed)
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     const { data, error } = await svc
       .from("exams")
       .select("id, title, status, start_time, end_time, access_type, created_at")
       .eq("status", "published")
-<<<<<<< HEAD
-      .single();
-    
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned - no active exam
-        return NextResponse.json({ 
-          activeExam: null, 
-          message: "No published exam found",
-          error: { code: error.code }
-        });
-      } else {
-        // Database error
-        return NextResponse.json({ 
-          error: {
-            message: error.message,
-            code: error.code,
-            details: error.details
-          }
-        }, { status: 400 });
-      }
-    }
-
-    // Check if exam is within time bounds
-    const now = new Date();
-    const startTime = data.start_time ? new Date(data.start_time) : null;
-    const endTime = data.end_time ? new Date(data.end_time) : null;
-    
-    const isNotStarted = startTime && now < startTime;
-    const isEnded = endTime && now > endTime;
-    const isActive = !isNotStarted && !isEnded;
-
-    return NextResponse.json({
-      activeExam: data,
-      isActive,
-      timeCheck: {
-        now: now.toISOString(),
-        startTime: startTime?.toISOString() || null,
-        endTime: endTime?.toISOString() || null,
-        isNotStarted,
-        isEnded
-      }
-=======
       .order("start_time", { ascending: true, nullsFirst: true });
 
     if (error) {
@@ -117,7 +70,6 @@ export async function GET(req: NextRequest) {
             isEnded,
           }
         : null,
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     });
   } catch (e: any) {
     return NextResponse.json(
