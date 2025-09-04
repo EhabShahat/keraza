@@ -130,8 +130,8 @@ export default function OptimizedImage({
       .map(ratio => {
         const scaledWidth = Math.round(width * ratio);
         const scaledHeight = height ? Math.round(height * ratio) : undefined;
-        const src = getOptimizedSrc(src, scaledWidth, scaledHeight);
-        return `${src} ${ratio}x`;
+        const optimizedSrc = getOptimizedSrc(src, scaledWidth, scaledHeight);
+        return `${optimizedSrc} ${ratio}x`;
       })
       .join(', ');
   }, [src, width, height, getOptimizedSrc]);
