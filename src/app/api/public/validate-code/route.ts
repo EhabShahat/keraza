@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getCodeFormatSettings, validateCodeFormat } from "@/lib/codeGenerator";
 
 export async function GET(request: NextRequest) {
   try {
     const code = request.nextUrl.searchParams.get("code")?.trim() || "";
     const examId = request.nextUrl.searchParams.get("examId")?.trim() || null;
 
-    // Enforce 4-digit numeric format
-    if (!/^\d{4}$/.test(code)) {
+    // Get code format settings and validate
+    const codeSettings = await getCodeFormatSettings();
+    if (!validateCodeFormat(code, codeSettings)) {
       return NextResponse.json({ valid: false, reason: "format" });
     }
 

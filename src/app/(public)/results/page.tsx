@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import BrandLogo from "@/components/BrandLogo";
 import { useRouter } from "next/navigation";
@@ -71,12 +71,53 @@ export default function PublicResultsPage({
   });
 
   const isCodeMode = effectiveMode === "code";
-  const is4Digits = /^\d{4}$/.test(searchTerm.trim());
+  
+  // Get code format settings to validate input
+  const { data: codeSettings } = useQuery({
+    queryKey: ["public", "code-settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/public/code-settings");
+      if (!res.ok) throw new Error("Failed to fetch code settings");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  // Validate code existence when in code mode and we have 4 digits
+  // Check if current search term matches the code format
+  const isValidCodeFormat = useMemo(() => {
+    if (!codeSettings || !searchTerm.trim()) return false;
+    
+    const { code_length, code_format, code_pattern } = codeSettings;
+    const code = searchTerm.trim();
+    
+    if (code_format === "custom" && code_pattern) {
+      if (code.length !== code_pattern.length) return false;
+      for (let i = 0; i < code_pattern.length; i++) {
+        const patternChar = code_pattern[i];
+        const codeChar = code[i];
+        switch (patternChar) {
+          case "N": if (!/\d/.test(codeChar)) return false; break;
+          case "A": if (!/[A-Z]/i.test(codeChar)) return false; break;
+          case "#": if (!/[A-Z0-9]/i.test(codeChar)) return false; break;
+          default: if (codeChar !== patternChar) return false;
+        }
+      }
+      return true;
+    }
+    
+    if (code.length !== code_length) return false;
+    switch (code_format) {
+      case "numeric": return /^\d+$/.test(code);
+      case "alphabetic": return /^[A-Z]+$/i.test(code);
+      case "alphanumeric": return /^[A-Z0-9]+$/i.test(code);
+      default: return /^\d+$/.test(code);
+    }
+  }, [codeSettings, searchTerm]);
+
+  // Validate code existence when in code mode and we have valid format
   const codeValidationQuery = useQuery<boolean, Error>({
     queryKey: ["public", "validate-code", searchTerm],
-    enabled: systemMode === 'results' && isCodeMode && is4Digits,
+    enabled: systemMode === 'results' && isCodeMode && isValidCodeFormat,
     queryFn: async () => {
       const res = await fetch(`/api/public/validate-code?code=${encodeURIComponent(searchTerm.trim())}`);
       if (!res.ok) throw new Error("Validation failed");
@@ -87,7 +128,7 @@ export default function PublicResultsPage({
   });
 
   const canSearch = isCodeMode
-    ? (is4Digits && codeValidationQuery.data === true)
+    ? (isValidCodeFormat && codeValidationQuery.data === true)
     : searchTerm.trim().length > 0;
 
   // Fetch filtered exam results from server only when user enters a term
@@ -232,7 +273,7 @@ export default function PublicResultsPage({
               <div className="min-h-[18px] text-xs text-center">
                 {!searchTerm.trim() ? (
                   <span className="text-gray-500">&nbsp;</span>
-                ) : !is4Digits ? (
+                ) : !isValidCodeFormat ? (
                   <span className="text-yellow-700">{t(locale, "code_must_be_4_digits")}</span>
                 ) : codeValidationQuery.isFetching ? (
                   <span className="text-blue-700">{t(locale, "checking_code")}</span>

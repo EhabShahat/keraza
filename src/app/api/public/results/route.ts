@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getCodeFormatSettings, validateCodeFormat } from "@/lib/codeGenerator";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,11 +38,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query joining necessary data. Only include attempts that have results.
-    // Extra guard: if code mode but input isn't 4 digits, short-circuit with empty list
+    // Extra guard: if code mode but input doesn't match format, short-circuit with empty list
     if (mode === "code") {
       const trimmed = searchTerm.trim();
-      if (!/^\d{4}$/.test(trimmed)) {
-        console.log("Code mode but non-4-digit input; returning empty");
+      const codeSettings = await getCodeFormatSettings();
+      if (!validateCodeFormat(trimmed, codeSettings)) {
+        console.log("Code mode but invalid format input; returning empty");
         return NextResponse.json({ items: [] });
       }
     }

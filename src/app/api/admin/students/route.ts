@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin, getBearerToken } from "@/lib/admin";
+import { getCodeFormatSettings, generateRandomCode } from "@/lib/codeGenerator";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,10 +37,11 @@ export async function POST(req: NextRequest) {
     // Generate code if not provided
     let finalCode = code;
     if (!finalCode) {
-      // Generate a unique 4-digit numeric code
+      // Get current code format settings and generate a unique code
+      const codeSettings = await getCodeFormatSettings();
       let attempts = 0;
       do {
-        finalCode = Math.floor(1000 + Math.random() * 9000).toString();
+        finalCode = generateRandomCode(codeSettings);
         attempts++;
         if (attempts > 100) {
           throw new Error("Failed to generate unique code");

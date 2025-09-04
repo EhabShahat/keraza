@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin, getBearerToken } from "@/lib/admin";
+import { getCodeFormatSettings, generateRandomCode } from "@/lib/codeGenerator";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,6 +26,9 @@ export async function POST(req: NextRequest) {
     const toInsert = [];
     const errors = [];
     
+    // Get current code format settings for bulk import
+    const codeSettings = await getCodeFormatSettings();
+    
     for (let i = 0; i < students.length; i++) {
       const student = students[i];
       const { student_name, mobile_number, code } = student;
@@ -36,10 +40,10 @@ export async function POST(req: NextRequest) {
       
       let finalCode = code;
       if (!finalCode) {
-        // Generate a unique 4-digit numeric code
+        // Generate a unique code using current format settings
         let attempts = 0;
         do {
-          finalCode = Math.floor(1000 + Math.random() * 9000).toString();
+          finalCode = generateRandomCode(codeSettings);
           attempts++;
           if (attempts > 100) {
             errors.push(`Row ${i + 1}: Failed to generate unique code`);
