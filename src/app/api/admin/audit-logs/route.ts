@@ -36,11 +36,11 @@ export async function GET(req: NextRequest) {
     // Get unique user IDs from actor field (since actor contains user IDs)
     const userIds = [...new Set(auditData?.map(log => log.actor).filter(Boolean) || [])];
     
-    // Fetch user data separately from auth.users
+    // Fetch user data from public.users table
     let userData: any[] = [];
     if (userIds.length > 0) {
-      const { data: users } = await svc.auth.admin.listUsers();
-      userData = users?.users?.filter(user => userIds.includes(user.id)) || [];
+      const { data: users } = await svc.from("users").select("id, email, username, display_name").in("id", userIds);
+      userData = users || [];
     }
 
     // Merge the data
