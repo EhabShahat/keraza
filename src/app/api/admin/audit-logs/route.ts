@@ -21,9 +21,10 @@ export async function GET(req: NextRequest) {
       action, 
       meta, 
       created_at,
-      user_id
+      user_id,
+      users:user_id(email, raw_user_meta_data)
     `).order("created_at", { ascending: false });
-    if (actor) q = q.ilike("actor", `%${actor}%`);
+    if (actor) q = q.or(`actor.ilike.%${actor}%,users.email.ilike.%${actor}%`);
     if (action) q = q.ilike("action", `%${action}%`);
     if (start) q = q.gte("created_at", start);
     if (end) q = q.lte("created_at", end);
