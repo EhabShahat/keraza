@@ -1,8 +1,12 @@
 "use client";
 
 interface StatusBadgeProps {
+<<<<<<< HEAD
   status: "draft" | "published" | "archived" | "active" | "inactive" | "used" | "unused" 
         | "in_progress" | "submitted" | "abandoned" | "invalid" | "unknown";
+=======
+  status: "draft" | "published" | "archived" | "active" | "inactive" | "used" | "unused";
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   size?: "sm" | "md";
 }
 
@@ -61,6 +65,7 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
       border: "border-gray-200",
       dot: "bg-gray-400",
       label: "Unused"
+<<<<<<< HEAD
     },
     in_progress: {
       bg: "bg-blue-100",
@@ -96,6 +101,8 @@ export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {
       border: "border-gray-200",
       dot: "bg-gray-400",
       label: "Unknown"
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     }
   };
 

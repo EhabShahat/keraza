@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { supabaseServer } from "@/lib/supabase/server";
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
 interface BrandLogoProps {
   logoUrl?: string | null;

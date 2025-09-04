@@ -178,9 +178,15 @@ function WelcomePageInner() {
           </div>
 
           {/* Welcome Header */}
+<<<<<<< HEAD
           <div className="mb-0 flex flex-col items-center text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center" style={{ lineHeight: 0 }}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600 block">
+=======
+          <div className="text-center mb-0">
+            <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
                 <path d="M20 6L9 17l-5-5" />
               </svg>
             </div>

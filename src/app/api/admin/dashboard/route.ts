@@ -48,6 +48,17 @@ export async function GET(req: NextRequest) {
       configMap.set((row as any).key, (row as any).value);
     }
 
+    // Get app settings including multi-exam mode
+    const appSettingsQuery = await svc
+      .from("app_settings")
+      .select("enable_multi_exam")
+      .limit(1)
+      .maybeSingle();
+
+    const appSettings = {
+      enable_multi_exam: appSettingsQuery.data?.enable_multi_exam ?? true, // Default to true
+    };
+
     const legacyDisabled = configMap.get("system_disabled") === "true";
     const mode = (configMap.get("system_mode") as 'exam' | 'results' | 'disabled' | undefined) || (legacyDisabled ? 'disabled' : 'exam');
     const systemStatus = {
@@ -84,6 +95,7 @@ export async function GET(req: NextRequest) {
         activeExam,
         stats,
         systemStatus,
+        appSettings,
       }),
       {
         status: 200,

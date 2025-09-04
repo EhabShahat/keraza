@@ -13,16 +13,29 @@ export async function GET(
     const { data, error } = await svc
       .from("exam_attempts")
       .select(`
+<<<<<<< HEAD
         submitted_at,
         student_name,
         exams!inner(
+=======
+        exam_id,
+        student_id,
+        submitted_at,
+        student_name,
+        exams!inner(
+          id,
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           title,
           description,
           duration_minutes,
           start_time,
           end_time
         ),
+<<<<<<< HEAD
         students(student_name)
+=======
+        students(code, student_name)
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       `)
       .eq("id", attemptId)
       .single();
@@ -37,6 +50,13 @@ export async function GET(
     const examData = (data as any).exams;
 
     return NextResponse.json({
+<<<<<<< HEAD
+=======
+      attempt_id: attemptId,
+      exam_id: (data as any).exam_id || null,
+      student_id: (data as any).student_id || null,
+      student_code: (data as any).students?.code || null,
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       student_name: (data as any).students?.student_name || (data as any).student_name || null,
       exam_title: examData?.title,
       submitted_at: data.submitted_at,

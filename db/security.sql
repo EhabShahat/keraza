@@ -64,7 +64,205 @@ BEGIN
   ) THEN
     EXECUTE 'DROP POLICY app_settings_admin_write ON public.app_settings';
   END IF;
+<<<<<<< HEAD
   EXECUTE 'CREATE POLICY app_settings_admin_write ON public.app_settings FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+=======
+  -- Consolidate app_settings policies into a single admin-all policy
+  IF EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'app_settings' AND policyname = 'app_settings_admin_all'
+  ) THEN
+    EXECUTE 'DROP POLICY app_settings_admin_all ON public.app_settings';
+  END IF;
+  EXECUTE 'CREATE POLICY app_settings_admin_all ON public.app_settings FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+-- Enable RLS on core public tables (idempotent)
+ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_ips ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_exam_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_config ENABLE ROW LEVEL SECURITY;
+
+-- Admin ALL policies (service role and admins)
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exams' AND policyname='exams_admin_all') THEN
+    EXECUTE 'DROP POLICY exams_admin_all ON public.exams';
+  END IF;
+  EXECUTE 'CREATE POLICY exams_admin_all ON public.exams FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='questions' AND policyname='questions_admin_all') THEN
+    EXECUTE 'DROP POLICY questions_admin_all ON public.questions';
+  END IF;
+  EXECUTE 'CREATE POLICY questions_admin_all ON public.questions FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_attempts' AND policyname='exam_attempts_admin_all') THEN
+    EXECUTE 'DROP POLICY exam_attempts_admin_all ON public.exam_attempts';
+  END IF;
+  EXECUTE 'CREATE POLICY exam_attempts_admin_all ON public.exam_attempts FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_results' AND policyname='exam_results_admin_all') THEN
+    EXECUTE 'DROP POLICY exam_results_admin_all ON public.exam_results';
+  END IF;
+  EXECUTE 'CREATE POLICY exam_results_admin_all ON public.exam_results FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_ips' AND policyname='exam_ips_admin_all') THEN
+    EXECUTE 'DROP POLICY exam_ips_admin_all ON public.exam_ips';
+  END IF;
+  EXECUTE 'CREATE POLICY exam_ips_admin_all ON public.exam_ips FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='audit_logs' AND policyname='audit_logs_admin_all') THEN
+    EXECUTE 'DROP POLICY audit_logs_admin_all ON public.audit_logs';
+  END IF;
+  EXECUTE 'CREATE POLICY audit_logs_admin_all ON public.audit_logs FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='users' AND policyname='users_admin_all') THEN
+    EXECUTE 'DROP POLICY users_admin_all ON public.users';
+  END IF;
+  EXECUTE 'CREATE POLICY users_admin_all ON public.users FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='admin_users' AND policyname='admin_users_admin_all') THEN
+    EXECUTE 'DROP POLICY admin_users_admin_all ON public.admin_users';
+  END IF;
+  EXECUTE 'CREATE POLICY admin_users_admin_all ON public.admin_users FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='students' AND policyname='students_admin_all') THEN
+    EXECUTE 'DROP POLICY students_admin_all ON public.students';
+  END IF;
+  EXECUTE 'CREATE POLICY students_admin_all ON public.students FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='student_exam_attempts' AND policyname='student_exam_attempts_admin_all') THEN
+    EXECUTE 'DROP POLICY student_exam_attempts_admin_all ON public.student_exam_attempts';
+  END IF;
+  EXECUTE 'CREATE POLICY student_exam_attempts_admin_all ON public.student_exam_attempts FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='app_config' AND policyname='app_config_admin_all') THEN
+    EXECUTE 'DROP POLICY app_config_admin_all ON public.app_config';
+  END IF;
+  EXECUTE 'CREATE POLICY app_config_admin_all ON public.app_config FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+-- Public SELECT policies where required by the app
+-- Exams visible to public only when published
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exams' AND policyname='exams_public_read_published') THEN
+    EXECUTE 'DROP POLICY exams_public_read_published ON public.exams';
+  END IF;
+  EXECUTE $$CREATE POLICY exams_public_read_published ON public.exams
+    FOR SELECT TO anon
+    USING (status = 'published')$$;
+END $do$;
+
+-- Exam attempts readable publicly only if they have results and belong to a published exam
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_attempts' AND policyname='exam_attempts_public_results_read') THEN
+    EXECUTE 'DROP POLICY exam_attempts_public_results_read ON public.exam_attempts';
+  END IF;
+  EXECUTE $$CREATE POLICY exam_attempts_public_results_read ON public.exam_attempts
+    FOR SELECT TO anon
+    USING (
+      EXISTS (SELECT 1 FROM public.exam_results er WHERE er.attempt_id = public.exam_attempts.id)
+      AND EXISTS (
+        SELECT 1 FROM public.exams ex
+        WHERE ex.id = public.exam_attempts.exam_id AND ex.status = 'published'
+      )
+    )$$;
+END $do$;
+
+-- Exam results readable publicly only when the related exam is published
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_results' AND policyname='exam_results_public_read') THEN
+    EXECUTE 'DROP POLICY exam_results_public_read ON public.exam_results';
+  END IF;
+  EXECUTE $$CREATE POLICY exam_results_public_read ON public.exam_results
+    FOR SELECT TO anon
+    USING (
+      EXISTS (
+        SELECT 1
+        FROM public.exam_attempts ea
+        JOIN public.exams ex ON ex.id = ea.exam_id
+        WHERE ea.id = public.exam_results.attempt_id AND ex.status = 'published'
+      )
+    )$$;
+END $do$;
+
+-- Students readable for public results search (only those tied to published attempts)
+-- and for by-code flows (only those tied to published code_based exams)
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='students' AND policyname='students_public_read') THEN
+    EXECUTE 'DROP POLICY students_public_read ON public.students';
+  END IF;
+  EXECUTE $$CREATE POLICY students_public_read ON public.students
+    FOR SELECT TO anon
+    USING (
+      EXISTS (
+        SELECT 1
+        FROM public.exam_attempts ea
+        JOIN public.exam_results er ON er.attempt_id = ea.id
+        JOIN public.exams ex ON ex.id = ea.exam_id
+        WHERE ea.student_id = public.students.id AND ex.status = 'published'
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM public.student_exam_attempts sea
+        JOIN public.exams ex2 ON ex2.id = sea.exam_id
+        WHERE sea.student_id = public.students.id AND ex2.status = 'published' AND ex2.access_type = 'code_based'
+      )
+    )$$;
+END $do$;
+
+-- Student exam attempts readable publicly only for published, code-based exams
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='student_exam_attempts' AND policyname='student_exam_attempts_public_read') THEN
+    EXECUTE 'DROP POLICY student_exam_attempts_public_read ON public.student_exam_attempts';
+  END IF;
+  EXECUTE $$CREATE POLICY student_exam_attempts_public_read ON public.student_exam_attempts
+    FOR SELECT TO anon
+    USING (
+      EXISTS (
+        SELECT 1 FROM public.exams ex
+        WHERE ex.id = public.student_exam_attempts.exam_id
+          AND ex.status = 'published'
+          AND ex.access_type = 'code_based'
+      )
+    )$$;
+END $do$;
+
+-- Public read of specific system configuration keys only
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='app_config' AND policyname='app_config_public_read_keys') THEN
+    EXECUTE 'DROP POLICY app_config_public_read_keys ON public.app_config';
+  END IF;
+  EXECUTE $$CREATE POLICY app_config_public_read_keys ON public.app_config
+    FOR SELECT TO anon
+    USING (key IN ('system_mode','system_disabled','system_disabled_message'))$$;
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 END $do$;
 
 -- Set immutable search_path for all functions in public

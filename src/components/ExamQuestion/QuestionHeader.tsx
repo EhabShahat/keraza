@@ -15,12 +15,20 @@ export default function QuestionHeader({
       <div className="flex items-start justify-between gap-4">
         <h3 
           id={legendId} 
+<<<<<<< HEAD
           className={`text-lg font-medium text-[var(--foreground)] leading-relaxed flex-1 select-none ${
+=======
+          className={`text-lg font-medium text-[var(--foreground)] leading-relaxed flex-1 select-none flex items-baseline gap-1 ${
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             questionHasArabic ? 'arabic-text' : ''
           }`}
           dir={questionHasArabic ? 'rtl' : 'ltr'}
         >
+<<<<<<< HEAD
           {q.required && <span className="text-red-500 mr-1">*</span>}
+=======
+          {q.required && <span className="text-red-500">*</span>}
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           {q.question_text}
         </h3>
         

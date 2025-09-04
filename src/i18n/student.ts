@@ -146,6 +146,20 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     home: "Home",
     results: "Results",
     
+<<<<<<< HEAD
+=======
+    // Multi-exam selection UI
+    select_exam: "Exam Access",
+    find_exams: "Find Exams",
+    exams_available_for_code: "Exams available for code {code}",
+    exams_available_for_student: "Exams available for {name}",
+    no_exams_for_code: "No exams available for this code.",
+    change_code: "Change Code",
+    more_exams_available: "More exams are available for your code.",
+    returning_to_exam_selection: "Returning to exam selection...",
+    go_to_exam_selection: "Go to exam selection",
+    
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Time warnings
     time_warning: "Time Warning",
     one_hour_remaining: "Only 1 hour remaining! Please manage your time carefully.",
@@ -281,6 +295,20 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     home: "الصفحة الرئيسية",
     results: "النتائج",
     
+<<<<<<< HEAD
+=======
+    // Multi-exam selection UI
+    select_exam: "دخول الاختبار",
+    find_exams: "اعرض الاختبارات",
+    exams_available_for_code: "الاختبارات المتاحة للرمز {code}",
+    exams_available_for_student: "الاختبارات المتاحة للطالب {name}",
+    no_exams_for_code: "لا توجد اختبارات متاحة لهذا الرمز.",
+    change_code: "تغيير الرمز",
+    more_exams_available: "هناك اختبارات أخرى متاحة لرمزك.",
+    returning_to_exam_selection: "سيتم إعادتك إلى اختيار الاختبار...",
+    go_to_exam_selection: "العودة لاختيار الاختبار",
+    
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Time warnings
     time_warning: "تحذير الوقت",
     one_hour_remaining: "باقي ساعة واحدة فقط! يرجى إدارة وقتك بعناية.",

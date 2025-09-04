@@ -21,6 +21,10 @@
  create unique index if not exists uniq_sea_exam_student on public.student_exam_attempts (exam_id, student_id);
  create index if not exists idx_sea_exam on public.student_exam_attempts (exam_id, started_at desc);
  create index if not exists idx_sea_student on public.student_exam_attempts (student_id);
+<<<<<<< HEAD
+=======
+  create index if not exists idx_sea_attempt_id on public.student_exam_attempts (attempt_id);
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
  -- IP rules lookups (create only if table exists)
  do $$ begin
@@ -30,6 +34,7 @@
      -- Optional helper index on ip_range for operations; may not accelerate << but harmless
      execute 'create index if not exists idx_ips_ip_range on public.exam_ips (ip_range)';
    end if;
+<<<<<<< HEAD
  end $$;
 
  -- Ensure at most one active (published) exam at a time
@@ -54,3 +59,11 @@
  create unique index if not exists one_published_exam
    on public.exams (status)
    where status = 'published';
+=======
+end $$;
+
+-- Single-exam enforcement removed: allow multiple published exams concurrently.
+
+-- Drop legacy unique index that enforced a single published exam
+drop index if exists one_published_exam;
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a

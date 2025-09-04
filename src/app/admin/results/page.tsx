@@ -231,10 +231,30 @@ export default function AdminResultsIndex() {
       case "student":
         return attempt.student_name || <span className="text-gray-400">Anonymous</span>;
       case "status":
-        const status = (attempt.completion_status ?? "in_progress") as "in_progress" | "submitted" | "abandoned" | "invalid";
+        const status = attempt.completion_status || "in_progress";
+        // Map completion status to StatusBadge status
+        let badgeStatus: "draft" | "published" | "archived" | "in_progress" | "submitted" | "abandoned" | "invalid";
+        switch (status) {
+          case "submitted":
+            badgeStatus = "submitted";
+            break;
+          case "completed":
+            badgeStatus = "submitted"; // Map completed to submitted for badge display
+            break;
+          case "abandoned":
+            badgeStatus = "abandoned";
+            break;
+          case "invalid":
+            badgeStatus = "invalid";
+            break;
+          case "in_progress":
+          default:
+            badgeStatus = "in_progress";
+            break;
+        }
         return (
           <StatusBadge 
-            status={status}
+            status={badgeStatus}
             size="sm" 
           />
         );

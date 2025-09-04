@@ -2,7 +2,10 @@ import { supabaseServer } from "@/lib/supabase/server";
 import PublicLocaleProvider from "@/components/public/PublicLocaleProvider";
 import PublicResultsPage from "./(public)/results/page";
 import MultiExamEntry from "@/components/public/MultiExamEntry";
+<<<<<<< HEAD
 import ExamEntry from "@/components/public/ExamEntry";
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 import Link from "next/link";
 import { resolveStudentLocale, getDir, type StudentLocale, t } from "@/i18n/student";
 
@@ -29,13 +32,19 @@ export default async function Home() {
     return <ErrorPage message="Database connection failed" />;
   }
 
+<<<<<<< HEAD
   // Read tri-state system mode from app_config and multi-exam setting from app_settings
   console.log("🧭 Checking system mode and exam settings...");
+=======
+  // Read tri-state system mode from app_config
+  console.log("🧭 Checking system mode...");
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   const { data: cfg, error: cfgErr } = await svc
     .from("app_config")
     .select("key, value")
     .in("key", ["system_mode", "system_disabled", "system_disabled_message"]);
 
+<<<<<<< HEAD
   // Check multi-exam setting from app_settings
   const { data: appSettings, error: settingsErr } = await svc
     .from("app_settings")
@@ -43,6 +52,8 @@ export default async function Home() {
     .limit(1)
     .maybeSingle();
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   if (cfgErr) {
     console.warn("⚠️ Failed to read app_config, defaulting to exam mode:", cfgErr.message);
   }
@@ -55,9 +66,13 @@ export default async function Home() {
   }
   const legacyDisabled = cfgMap.get("system_disabled") === "true";
   const mode = (cfgMap.get("system_mode") as "exam" | "results" | "disabled" | undefined) || (legacyDisabled ? "disabled" : "exam");
+<<<<<<< HEAD
   const isMultiExamEnabled = appSettings?.enable_multi_exam !== false; // Default to true if not set
   
   console.log("🧭 System mode:", mode, "Multi-exam enabled:", isMultiExamEnabled);
+=======
+  console.log("🧭 System mode:", mode);
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
   if (mode === "disabled") {
     const message = cfgMap.get("system_disabled_message") || "No exams are currently available. Please check back later.";
@@ -71,6 +86,7 @@ export default async function Home() {
       </PublicLocaleProvider>
     );
   }
+<<<<<<< HEAD
 
   // Exam mode: check if multi-exam is enabled
   if (isMultiExamEnabled) {
@@ -165,6 +181,15 @@ export default async function Home() {
       </PublicLocaleProvider>
     );
   }
+=======
+  // Exam mode: render multi-exam entry (code-based selection)
+  console.log("🚀 Rendering MultiExamEntry on root (exam mode)");
+  return (
+    <PublicLocaleProvider>
+      <MultiExamEntry />
+    </PublicLocaleProvider>
+  );
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 }
 
 function NoExamsPage() {

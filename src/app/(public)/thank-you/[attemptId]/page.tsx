@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { useParams } from "next/navigation";
+=======
+import { useParams, useRouter } from "next/navigation";
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 import BrandLogo from "@/components/BrandLogo";
 import { useStudentLocale } from "@/components/public/PublicLocaleProvider";
 import { t } from "@/i18n/student";
@@ -16,6 +20,13 @@ interface AppSettings {
 }
 
 interface AttemptInfo {
+<<<<<<< HEAD
+=======
+  attempt_id?: string;
+  exam_id?: string;
+  student_id?: string;
+  student_code?: string;
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   student_name?: string;
   exam_title?: string;
   submitted_at?: string;
@@ -27,6 +38,13 @@ export default function ThankYouPage() {
   const [attemptInfo, setAttemptInfo] = useState<AttemptInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const { locale, dir } = useStudentLocale();
+<<<<<<< HEAD
+=======
+  const router = useRouter();
+  const [hasRemainingExams, setHasRemainingExams] = useState(false);
+  const [remainingChecked, setRemainingChecked] = useState(false);
+  const [studentCode, setStudentCode] = useState<string | null>(null);
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
   function formatDateInCairo(loc: string, iso: string) {
     try {
@@ -90,6 +108,57 @@ export default function ThankYouPage() {
     fetchData();
   }, [attemptId]);
 
+<<<<<<< HEAD
+=======
+  // Check remaining exams using the student's code
+  useEffect(() => {
+    const code = attemptInfo?.student_code?.trim();
+    if (!code || !/^\d{4}$/.test(code)) return;
+    setStudentCode(code);
+    let cancelled = false;
+
+    async function checkRemaining(codeValue: string) {
+      try {
+        const res = await fetch(`/api/public/exams/by-code?code=${encodeURIComponent(codeValue)}`, { cache: "no-store" });
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        const items: Array<{ attempt_status: "in_progress" | "completed" | null; is_active?: boolean; not_started?: boolean; ended?: boolean }> = data?.exams || [];
+        const anyRemaining = items.some((ex) => {
+          const isActive = typeof (ex as any).is_active === "boolean"
+            ? (ex as any).is_active
+            : ((ex as any).not_started === false && (ex as any).ended === false);
+          return isActive && ex.attempt_status !== "completed";
+        });
+        if (!cancelled) {
+          setHasRemainingExams(anyRemaining);
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setRemainingChecked(true);
+      }
+    }
+    checkRemaining(code);
+    return () => { cancelled = true; };
+  }, [attemptInfo?.student_code]);
+
+  // Auto-redirect when more exams are available
+  useEffect(() => {
+    if (!hasRemainingExams || !studentCode) return;
+    const url = `/?code=${encodeURIComponent(studentCode)}`;
+    const timer = setTimeout(() => {
+      try {
+        router.push(url);
+      } catch {
+        window.location.href = url;
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [hasRemainingExams, studentCode, router]);
+
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   if (loading) {
     return (
       <main dir={dir} lang={locale} className="min-h-screen bg-[var(--background)] flex items-center justify-center">
@@ -127,8 +196,13 @@ export default function ThankYouPage() {
           </div>
 
           {/* Success Icon */}
+<<<<<<< HEAD
           <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center" style={{ lineHeight: 0 }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600 block">
+=======
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
               <path d="M20 6L9 17l-5-5"/>
             </svg>
           </div>
@@ -140,6 +214,28 @@ export default function ThankYouPage() {
           
           <p className="text-lg text-[var(--muted-foreground)] mb-6">{thankMessage}</p>
 
+<<<<<<< HEAD
+=======
+          {/* Remaining exams notice and redirect (prominent) */}
+          {remainingChecked && studentCode && hasRemainingExams && (
+            <div className="bg-green-50 border border-green-300 rounded-lg p-5 mb-8 text-start">
+              <p className="text-green-900 font-semibold mb-1">{t(locale, "more_exams_available")}</p>
+              <p className="text-green-800 text-sm">{t(locale, "returning_to_exam_selection")}</p>
+              <div className="mt-3">
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    const url = `/?code=${encodeURIComponent(studentCode)}`;
+                    try { router.push(url); } catch { window.location.href = url; }
+                  }}
+                >
+                  {t(locale, "go_to_exam_selection")}
+                </button>
+              </div>
+            </div>
+          )}
+
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           {/* Exam Details */}
           <div className="bg-[var(--muted)]/30 rounded-lg p-6 mb-8">
             <h3 className="font-semibold text-[var(--foreground)] mb-3">{t(locale, "submission_details")}</h3>
@@ -170,6 +266,7 @@ export default function ThankYouPage() {
             <p className="text-blue-800 text-sm">{t(locale, "thank_you_default_message")}</p>
           </div>
 
+<<<<<<< HEAD
           {/* Action Button */}
           <button
             onClick={() => window.close()}
@@ -177,6 +274,9 @@ export default function ThankYouPage() {
           >
             {t(locale, "close_window")}
           </button>
+=======
+          
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-[var(--border)]">

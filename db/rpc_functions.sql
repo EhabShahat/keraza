@@ -5,6 +5,7 @@
 -- Ensure pgcrypto for gen_random_uuid/gen_random_bytes
 create extension if not exists pgcrypto;
 
+<<<<<<< HEAD
 -- Ensure exam_attempts has device_info column (idempotent)
 alter table if exists public.exam_attempts add column if not exists device_info jsonb;
 
@@ -51,6 +52,8 @@ $function$;
 
 GRANT EXECUTE ON FUNCTION public.log_attempt_activity(uuid, jsonb) TO service_role;
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 -- Execute arbitrary SQL passed from the server (service role only)
 -- Splits by semicolons and executes each non-empty, non-comment statement.
 CREATE OR REPLACE FUNCTION public.exec_sql(sql text)
@@ -360,6 +363,7 @@ BEGIN
 END;
 $function$;
 
+<<<<<<< HEAD
 -- cleanup_expired_attempts() -> auto-submit expired in-progress attempts
 CREATE OR REPLACE FUNCTION public.cleanup_expired_attempts()
  RETURNS TABLE(auto_submitted_count integer)
@@ -402,6 +406,8 @@ BEGIN
 END;
 $function$;
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 -- admin_list_attempts(uuid) -> attempts list for Admin UI
 CREATE OR REPLACE FUNCTION public.admin_list_attempts(p_exam_id uuid)
 RETURNS TABLE (
@@ -447,7 +453,10 @@ grant execute on function public.start_attempt(uuid, text, text, inet) to anon, 
 grant execute on function public.start_attempt_v2(uuid, text, text, inet) to anon, authenticated;
 grant execute on function public.submit_attempt(uuid) to anon, authenticated;
 grant execute on function public.admin_list_attempts(uuid) to service_role;
+<<<<<<< HEAD
 grant execute on function public.cleanup_expired_attempts() to service_role;
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
 -- Admin management RPCs
 -- Reset a student's attempts (admin only). This deletes rows from student_exam_attempts

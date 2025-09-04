@@ -4,6 +4,11 @@ import "./globals.css";
 import Providers from "./providers";
 import StorageCleaner from "@/components/StorageCleaner";
 import StudentStorageCleaner from "@/components/StudentStorageCleaner";
+<<<<<<< HEAD
+=======
+import { supabaseServer } from "@/lib/supabase/server";
+import { resolveStudentLocale, type StudentLocale } from "@/i18n/student";
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
 const appSans = Tajawal({
   variable: "--font-app-sans",
@@ -29,13 +34,37 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+<<<<<<< HEAD
 export default function RootLayout({
+=======
+export const dynamic = 'force-dynamic';
+
+export default async function RootLayout({
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+<<<<<<< HEAD
   return (
     <html lang="en" translate="no" className="notranslate">
+=======
+  // SSR-resolve default locale and dir to avoid hydration shift and mobile RTL issues
+  let locale: StudentLocale = "en";
+  try {
+    const svc = supabaseServer();
+    const { data } = await svc
+      .from("app_settings")
+      .select("default_language")
+      .limit(1)
+      .maybeSingle();
+    locale = resolveStudentLocale(data as any);
+  } catch {
+    // ignore and keep default "en"
+  }
+  return (
+    <html lang={locale} dir="ltr" translate="no" className="notranslate">
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       <head>
         {/* Enhanced mobile compatibility */}
         <meta name="format-detection" content="telephone=no" />

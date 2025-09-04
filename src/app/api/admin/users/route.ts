@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     console.log("[API] /api/admin/users - success", { created_user_id: item?.user_id || null });
 
+<<<<<<< HEAD
     // Ensure admin_users row exists when is_admin is requested
     if (is_admin && item?.user_id) {
       try {
@@ -71,6 +72,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     try {
       await auditLog(actor.username || actor.email || actor.user_id, "admin_create_user", {
         username: username || null,

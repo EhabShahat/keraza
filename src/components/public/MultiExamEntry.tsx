@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import { useStudentLocale } from "@/components/public/PublicLocaleProvider";
 import { t } from "@/i18n/student";
+import type { CodeFormatSettings } from "@/lib/codeGenerator";
 
 interface ByCodeExamItem {
   id: string;
@@ -33,22 +34,123 @@ export default function MultiExamEntry() {
   const [exams, setExams] = useState<ByCodeExamItem[] | null>(null);
   const [startingExamId, setStartingExamId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
+  const [codeSettings, setCodeSettings] = useState<CodeFormatSettings | null>(null);
 
   // Track current ?code value from URL
   const codeParam = useMemo(() => (searchParams?.get("code") || "").trim(), [searchParams]);
 
+  // Fetch code format settings on mount
+  useEffect(() => {
+    async function fetchCodeSettings() {
+      try {
+        const res = await fetch("/api/public/code-settings", { cache: "no-store" });
+        if (res.ok) {
+          const settings = await res.json();
+          setCodeSettings(settings);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch code settings, using defaults");
+        setCodeSettings({
+          code_length: 4,
+          code_format: "numeric",
+          code_pattern: null,
+        });
+      }
+    }
+    void fetchCodeSettings();
+  }, []);
+
+  // Helper function to validate code format
+  const isValidCode = (code: string): boolean => {
+    if (!codeSettings || !code) return false;
+    
+    const { code_length, code_format, code_pattern } = codeSettings;
+
+    if (code_format === "custom" && code_pattern) {
+      if (code.length !== code_pattern.length) return false;
+      
+      for (let i = 0; i < code_pattern.length; i++) {
+        const patternChar = code_pattern[i];
+        const codeChar = code[i];
+
+        switch (patternChar) {
+          case "N":
+            if (!/\d/.test(codeChar)) return false;
+            break;
+          case "A":
+            if (!/[A-Z]/i.test(codeChar)) return false;
+            break;
+          case "#":
+            if (!/[A-Z0-9]/i.test(codeChar)) return false;
+            break;
+          default:
+            if (codeChar !== patternChar) return false;
+        }
+      }
+      return true;
+    }
+
+    if (code.length !== code_length) return false;
+
+    switch (code_format) {
+      case "numeric":
+        return /^\d+$/.test(code);
+      case "alphabetic":
+        return /^[A-Z]+$/i.test(code);
+      case "alphanumeric":
+        return /^[A-Z0-9]+$/i.test(code);
+      default:
+        return /^\d+$/.test(code);
+    }
+  };
+
+  // Helper functions for input field
+  const getPlaceholder = (): string => {
+    if (!codeSettings) return "0000";
+    
+    const { code_length, code_format, code_pattern } = codeSettings;
+    
+    if (code_format === "custom" && code_pattern) {
+      return code_pattern.replace(/N/g, "0").replace(/A/g, "A").replace(/#/g, "0");
+    }
+    
+    switch (code_format) {
+      case "numeric":
+        return "0".repeat(code_length);
+      case "alphabetic":
+        return "A".repeat(code_length);
+      case "alphanumeric":
+        return "A0".repeat(Math.ceil(code_length / 2)).substring(0, code_length);
+      default:
+        return "0".repeat(code_length);
+    }
+  };
+
+  const getMaxLength = (): number => {
+    if (!codeSettings) return 4;
+    
+    const { code_length, code_format, code_pattern } = codeSettings;
+    
+    if (code_format === "custom" && code_pattern) {
+      return code_pattern.length;
+    }
+    
+    return code_length;
+  };
+
   // Prefill/refetch based on ?code param; rerun on param changes (including return navigation)
   useEffect(() => {
-    if (/^\d{4}$/.test(codeParam)) {
+    if (codeSettings && isValidCode(codeParam)) {
       setCode(codeParam);
       void verifyCode(codeParam);
     }
-  }, [codeParam]);
+  }, [codeParam, codeSettings]);
+
 
   // Also refetch when the page regains focus or becomes visible (handles browser back/BFCache cases)
   useEffect(() => {
     function refetchIfCode() {
-      if (/^\d{4}$/.test(codeParam)) {
+      if (codeSettings && isValidCode(codeParam)) {
         void verifyCode(codeParam);
       }
     }
@@ -202,17 +304,13 @@ export default function MultiExamEntry() {
                 </label>
                 <div className="relative">
                   <input
-                    id="exam-code"
                     type="text"
                     value={code}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "").slice(0, 4);
-                      setCode(value);
-                    }}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
                     className="w-full px-4 py-4 text-center text-2xl font-mono tracking-[0.5em] border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 focus:bg-white"
-                    placeholder="0000"
-                    maxLength={4}
-                    inputMode="numeric"
+                    placeholder={codeSettings ? getPlaceholder() : "0000"}
+                    maxLength={codeSettings ? getMaxLength() : 4}
+                    inputMode={codeSettings?.code_format === "numeric" ? "numeric" : "text"}
                     autoComplete="one-time-code"
                     required
                   />
@@ -231,7 +329,7 @@ export default function MultiExamEntry() {
 
                 <button
                   type="submit"
-                  disabled={checking || !/^\d{4}$/.test(code)}
+                  disabled={checking || !isValidCode(code)}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl disabled:shadow-md"
                 >
                   {checking ? (

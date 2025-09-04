@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin";
 import { auditLog } from "@/lib/audit";
 
+<<<<<<< HEAD
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ attemptId: string }> }
@@ -58,6 +59,8 @@ export async function GET(
   }
 }
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ attemptId: string }> }
@@ -77,12 +80,20 @@ export async function DELETE(
 
     // First, get the attempt details for logging
     const { data: attempt, error: fetchError } = await supabase
+<<<<<<< HEAD
       .from("exam_attempts")
       .select(`
         id,
         exam_id,
         student_id,
         student_name,
+=======
+      .from("attempts")
+      .select(`
+        id,
+        student_name,
+        student_email,
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
         exam:exams(title)
       `)
       .eq("id", attemptId)
@@ -95,6 +106,7 @@ export async function DELETE(
       );
     }
 
+<<<<<<< HEAD
     // Best-effort: remove gating row tied to this attempt_id before deleting the attempt.
     // This covers legacy attempts where exam_attempts.student_id may be null.
     {
@@ -110,6 +122,11 @@ export async function DELETE(
     // Delete the attempt (this will cascade to related records)
     const { error: deleteError } = await supabase
       .from("exam_attempts")
+=======
+    // Delete the attempt (this will cascade to related records)
+    const { error: deleteError } = await supabase
+      .from("attempts")
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       .delete()
       .eq("id", attemptId);
 
@@ -121,6 +138,7 @@ export async function DELETE(
       );
     }
 
+<<<<<<< HEAD
     // If this attempt belonged to a student (code-based access), reset per-exam gating
     if ((attempt as any).student_id && (attempt as any).exam_id) {
       const studentId = (attempt as any).student_id as string;
@@ -157,20 +175,33 @@ export async function DELETE(
       }
     }
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Log the admin action
     await auditLog(admin.user_id, "delete_attempt", {
       resource_type: "attempt",
       resource_id: attemptId,
       student_name: attempt.student_name,
+<<<<<<< HEAD
+=======
+      student_email: attempt.student_email,
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       exam_title: (attempt.exam as any)?.title,
     });
 
     return NextResponse.json({ success: true });
+<<<<<<< HEAD
   } catch (e: any) {
     if (e instanceof Response) return e;
     console.error("Delete attempt error:", e);
     return NextResponse.json(
       { error: e?.message || "Internal server error" },
+=======
+  } catch (error) {
+    console.error("Delete attempt error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       { status: 500 }
     );
   }

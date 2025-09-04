@@ -4,7 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { authFetch } from "@/lib/authFetch";
 import { useParams } from "next/navigation";
+<<<<<<< HEAD
 import StatusBadge from "@/components/admin/StatusBadge";
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
 export default function AdminAttemptDetails() {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -31,6 +34,7 @@ export default function AdminAttemptDetails() {
     },
   });
 
+<<<<<<< HEAD
   const actQ = useQuery({
     queryKey: ["admin", "attempt", attemptId, "activity"],
     enabled: !!attemptId,
@@ -42,6 +46,8 @@ export default function AdminAttemptDetails() {
     },
   });
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   if (!attemptId) {
     return (
       <div className="space-y-4">
@@ -50,6 +56,7 @@ export default function AdminAttemptDetails() {
     );
   }
 
+<<<<<<< HEAD
   // Helpers for formatting device info
   const fmtBool = (v: any) => (v === true ? "Yes" : v === false ? "No" : "-");
   const fmtPct = (v: any) => (typeof v === "number" ? `${v}%` : "-");
@@ -73,6 +80,8 @@ export default function AdminAttemptDetails() {
       : "-";
   const pick = (v: any) => (v === null || v === undefined || v === "" ? "-" : String(v));
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -93,6 +102,7 @@ export default function AdminAttemptDetails() {
           <h2 className="font-semibold mb-2">Summary</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
             <div><span className="text-gray-600">Student:</span> {metaQ.data.student_name ?? "-"}</div>
+<<<<<<< HEAD
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Status:</span>
               {(() => {
@@ -100,6 +110,9 @@ export default function AdminAttemptDetails() {
                 return <StatusBadge status={status} size="sm" />;
               })()}
             </div>
+=======
+            <div><span className="text-gray-600">Status:</span> {metaQ.data.completion_status ?? "-"}</div>
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             <div><span className="text-gray-600">Started:</span> {metaQ.data.started_at ?? "-"}</div>
             <div><span className="text-gray-600">Submitted:</span> {metaQ.data.submitted_at ?? "-"}</div>
             <div><span className="text-gray-600">Latest IP:</span> {metaQ.data.ip_address ?? "-"}</div>
@@ -117,6 +130,7 @@ export default function AdminAttemptDetails() {
         </div>
       )}
 
+<<<<<<< HEAD
       {metaQ.data?.device_info && (() => {
         const di: any = metaQ.data.device_info || {};
         const parsed = di?.parsed || {};
@@ -260,6 +274,8 @@ export default function AdminAttemptDetails() {
         );
       })()}
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
       {stateQ.data && (
         <div className="bg-white border rounded p-3">
           <h2 className="font-semibold mb-2">Per-question responses</h2>
@@ -296,7 +312,10 @@ function PerQuestionTable({ state }: { state: any }) {
           {questions.map((q) => {
             const ans = answers[q.id];
             const ok = isCorrect(q, ans);
+<<<<<<< HEAD
             const hasAns = hasAnswer(q, ans);
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             return (
               <tr key={q.id} className="border-t align-top">
                 <td className="p-2 border text-sm max-w-xl">
@@ -304,6 +323,7 @@ function PerQuestionTable({ state }: { state: any }) {
                   <div className="text-xs text-gray-500">{q.id}</div>
                 </td>
                 <td className="p-2 border text-sm">{q.question_type}</td>
+<<<<<<< HEAD
                 <td className="p-2 border text-sm whitespace-pre-wrap">{hasAns ? fmtAnswer(q, ans) : ""}</td>
                 <td className="p-2 border text-sm">
                   {!hasAns
@@ -313,6 +333,11 @@ function PerQuestionTable({ state }: { state: any }) {
                       : ok
                         ? <span className="text-green-700">✔</span>
                         : <span className="text-red-700">✘</span>}
+=======
+                <td className="p-2 border text-sm whitespace-pre-wrap">{fmtAnswer(q, ans)}</td>
+                <td className="p-2 border text-sm">
+                  {ok === null ? <span className="text-gray-500">n/a</span> : ok ? <span className="text-green-700">✔</span> : <span className="text-red-700">✘</span>}
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
                 </td>
               </tr>
             );
@@ -365,6 +390,7 @@ function isCorrect(question: any, answer: unknown): boolean | null {
   if (t === "multiple_choice" || t === "multi_select") return arraysEqualIgnoreOrder(answer, correct);
   return null;
 }
+<<<<<<< HEAD
 function hasAnswer(question: any, answer: unknown): boolean {
   const t = question.question_type as QType;
   if (t === "true_false") return typeof answer === "boolean";
@@ -373,6 +399,8 @@ function hasAnswer(question: any, answer: unknown): boolean {
   if (t === "paragraph") return typeof answer === "string" && normStr(answer) !== "";
   return false;
 }
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 function fmtAnswer(question: any, answer: unknown): string {
   const t = question.question_type as QType;
   if (t === "true_false") return String(Boolean(answer));

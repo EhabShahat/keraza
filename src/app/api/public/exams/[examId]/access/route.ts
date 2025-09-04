@@ -12,7 +12,10 @@ export async function POST(
     const body = await req.json().catch(() => ({}));
     const code: string | null = body?.code ?? null;
     const studentName: string | null = body?.studentName ?? null;
+<<<<<<< HEAD
     const deviceInfo: any | null = body?.deviceInfo ?? null;
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     const hdrs = await headers();
     const ip = getClientIp(hdrs);
 
@@ -95,6 +98,7 @@ export async function POST(
       return NextResponse.json({ error: "no_attempt" }, { status: 400 });
     }
 
+<<<<<<< HEAD
     // Best-effort: store device metadata if provided
     if (deviceInfo && typeof deviceInfo === "object") {
       try {
@@ -107,6 +111,8 @@ export async function POST(
       }
     }
 
+=======
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Get student name for the response (reuse studentData if already fetched)
     let finalStudentName = studentName;
     if (code && studentData?.student_name) {

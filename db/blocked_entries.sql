@@ -18,12 +18,17 @@ ALTER TABLE blocked_entries ENABLE ROW LEVEL SECURITY;
 
 -- Create policy for admin access only
 CREATE POLICY "Admin can manage blocked entries" ON blocked_entries
+<<<<<<< HEAD
   FOR ALL USING (
     EXISTS (
       SELECT 1 FROM admin_users 
       WHERE id = auth.uid()
     )
   );
+=======
+  FOR ALL USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+>>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
 -- Grant permissions
 GRANT ALL ON blocked_entries TO authenticated;
