@@ -19,14 +19,16 @@ const { loadEnv } = require('./utils/load-env');
   const supabase = createClient(url, serviceKey);
 
   const root = path.resolve(__dirname, '..');
-  const files = [
-    path.join(root, 'db', 'security.sql'),
-    path.join(root, 'db', 'rpc_functions.sql'),
-<<<<<<< HEAD
-=======
-    path.join(root, 'db', 'indexes.sql'),
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
-  ];
+  
+  // Allow specifying a single file via command line argument
+  const targetFile = process.argv[2];
+  const files = targetFile 
+    ? [path.resolve(targetFile)]
+    : [
+        path.join(root, 'db', 'security.sql'),
+        path.join(root, 'db', 'rpc_functions.sql'),
+        path.join(root, 'db', 'indexes.sql'),
+      ];
 
   function splitSQL(input) {
     const stmts = [];

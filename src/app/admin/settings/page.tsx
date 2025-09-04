@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminGuard from "@/components/AdminGuard";
 import { supabaseClient } from "@/lib/supabase/client";
+import LogoUpload from "@/components/admin/LogoUpload";
+import { authFetch } from "@/lib/authFetch";
 
 type AppSettings = {
   id?: string;
@@ -25,16 +27,29 @@ type AppSettings = {
   code_pattern?: string | null;
 };
 
+type Admin = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
 export default function AdminSettingsPage() {
   const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Administrator Management
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [addingAdmin, setAddingAdmin] = useState(false);
 
-  // Load settings on mount
+  // Load settings and admins on mount
   useEffect(() => {
     loadSettings();
+    loadAdmins();
   }, []);
 
   const loadSettings = async () => {
@@ -93,6 +108,67 @@ export default function AdminSettingsPage() {
       setError(err.message || "Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const loadAdmins = async () => {
+    try {
+      setLoadingAdmins(true);
+      const res = await authFetch("/api/admin/admins");
+      if (res.ok) {
+        const data = await res.json();
+        setAdmins(data.items || []);
+      }
+    } catch (err) {
+      console.error("Failed to load admins:", err);
+    } finally {
+      setLoadingAdmins(false);
+    }
+  };
+
+  const addAdmin = async () => {
+    if (!newAdminEmail.trim()) return;
+    
+    try {
+      setAddingAdmin(true);
+      const res = await authFetch("/api/admin/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newAdminEmail.trim() })
+      });
+      
+      if (res.ok) {
+        setNewAdminEmail("");
+        loadAdmins();
+        alert("Administrator added successfully!");
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to add administrator");
+      }
+    } catch (err) {
+      alert("Failed to add administrator");
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const removeAdmin = async (adminId: string) => {
+    if (!confirm("Are you sure you want to remove this administrator?")) return;
+    
+    try {
+      const res = await authFetch(`/api/admin/admins/${adminId}`, {
+        method: "DELETE"
+      });
+      
+      if (res.ok) {
+        loadAdmins();
+        alert("Administrator removed successfully!");
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to remove administrator");
+      }
+    } catch (err) {
+      alert("Failed to remove administrator");
     }
   };
 
@@ -183,6 +259,75 @@ export default function AdminSettingsPage() {
           {/* Settings Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
+            {/* Administrator Management */}
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">Administrator Management</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Add New Admin */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Add New Administrator</label>
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={addingAdmin}
+                    />
+                    <button
+                      onClick={addAdmin}
+                      disabled={addingAdmin || !newAdminEmail.trim()}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-xl transition-colors disabled:cursor-not-allowed"
+                    >
+                      {addingAdmin ? "Adding..." : "Add"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Current Admins */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Current Administrators</label>
+                  {loadingAdmins ? (
+                    <div className="text-center py-4">
+                      <div className="w-6 h-6 mx-auto border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {admins.map((admin) => (
+                        <div key={admin.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div>
+                            <div className="font-medium text-slate-800">{admin.email}</div>
+                            <div className="text-xs text-slate-500">Added {new Date(admin.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <button
+                            onClick={() => removeAdmin(admin.id)}
+                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
+                            title="Remove administrator"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                      {admins.length === 0 && (
+                        <div className="text-center py-4 text-slate-500">No administrators found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
             {/* System Configuration */}
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
               <div className="flex items-center gap-3 mb-6">
@@ -229,9 +374,10 @@ export default function AdminSettingsPage() {
                   </div>
                 </div>
 
-                {/* Search Mode */}
+                {/* Student Results Search Mode */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Student Search Mode</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Student Results Search Mode</label>
+                  <p className="text-sm text-slate-600 mb-4">Configure how students can search for their results on the public results page.</p>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => {
@@ -246,7 +392,7 @@ export default function AdminSettingsPage() {
                     >
                       <div className="text-center">
                         <div className="font-semibold">Name Search</div>
-                        <div className="text-sm opacity-75">Search by student name</div>
+                        <div className="text-sm opacity-75">Students search by their name</div>
                       </div>
                     </button>
                     <button
@@ -262,9 +408,21 @@ export default function AdminSettingsPage() {
                     >
                       <div className="text-center">
                         <div className="font-semibold">Code Search</div>
-                        <div className="text-sm opacity-75">Search by student code</div>
+                        <div className="text-sm opacity-75">Students search by their code</div>
                       </div>
                     </button>
+                  </div>
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="text-sm text-blue-800">
+                        <strong>Note:</strong> This setting controls how students can find their exam results on the public results page. 
+                        {settings.enable_name_search && !settings.enable_code_search && " Students will search by entering their name."}
+                        {!settings.enable_name_search && settings.enable_code_search && " Students will search by entering their unique code."}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -368,13 +526,10 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">Logo URL</label>
-                  <input
-                    type="url"
-                    value={settings.brand_logo_url || ""}
-                    onChange={(e) => updateSetting("brand_logo_url", e.target.value)}
-                    placeholder="https://example.com/logo.png"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <LogoUpload
+                    currentLogoUrl={settings.brand_logo_url}
+                    onLogoChange={(url) => updateSetting("brand_logo_url", url)}
+                    disabled={saving}
                   />
                 </div>
 
@@ -436,6 +591,59 @@ export default function AdminSettingsPage() {
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                     dir="rtl"
                   />
+                </div>
+
+                {/* Thank You Messages */}
+                <div className="pt-6 border-t border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Thank You Page Messages</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-3">Thank You Title (English)</label>
+                      <input
+                        type="text"
+                        value={settings.thank_you_title || ""}
+                        onChange={(e) => updateSetting("thank_you_title", e.target.value)}
+                        placeholder="Thank you for completing the exam!"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-3">Thank You Title (Arabic)</label>
+                      <input
+                        type="text"
+                        value={settings.thank_you_title_ar || ""}
+                        onChange={(e) => updateSetting("thank_you_title_ar", e.target.value)}
+                        placeholder="شكراً لك لإكمال الامتحان!"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        dir="rtl"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-3">Thank You Message (English)</label>
+                      <textarea
+                        value={settings.thank_you_message || ""}
+                        onChange={(e) => updateSetting("thank_you_message", e.target.value)}
+                        placeholder="Your responses have been submitted successfully..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-3">Thank You Message (Arabic)</label>
+                      <textarea
+                        value={settings.thank_you_message_ar || ""}
+                        onChange={(e) => updateSetting("thank_you_message_ar", e.target.value)}
+                        placeholder="تم إرسال إجاباتك بنجاح..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

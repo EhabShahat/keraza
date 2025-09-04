@@ -9,6 +9,7 @@ import { shuffle } from "@/lib/randomization";
 import { useStudentLocale } from "@/components/public/PublicLocaleProvider";
 import { t } from "@/i18n/student";
 import { useParams } from "next/navigation";
+import ScreenshotProtection from "@/components/ScreenshotProtection";
 
 // Note: Storage clearing is now handled automatically by the global StorageCleaner component
 // This ensures students get a completely fresh experience every time they access any page
@@ -303,6 +304,27 @@ export default function AttemptPage() {
     scheduleSave(800);
   }
 
+  // Activity logging function
+  async function logActivity(activity: string, details?: any) {
+    if (!attemptId) return;
+    
+    try {
+      await fetch(`/api/attempts/${attemptId}/activity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          activity_type: activity,
+          details: details || {},
+          timestamp: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          url: window.location.href
+        })
+      });
+    } catch (error) {
+      console.warn('Failed to log activity:', error);
+    }
+  }
+
   // Persist to localStorage for recovery/offline support
   useEffect(() => {
     try {
@@ -519,14 +541,33 @@ export default function AttemptPage() {
     : { paddingLeft: sidebarWidthPx };
 
   return (
-    <div dir={dir} lang={locale} style={{ 
-      minHeight: '100vh', 
-      width: '100%', 
-      display: 'flex', 
-      flexDirection: 'column',
-      margin: 0,
-      padding: 0
-    }}>
+    <ScreenshotProtection 
+      enabled={true}
+      onViolation={(type) => {
+        console.warn('Security violation detected:', type);
+        logActivity('security_violation', { type, timestamp: Date.now() });
+      }}
+      onSuspiciousActivity={(activity, details) => {
+        console.warn('Suspicious activity:', activity, details);
+        logActivity(activity, details);
+      }}
+      onTabSwitch={(details) => {
+        logActivity('tab_switch', details);
+      }}
+      onDeviceDetected={(devices) => {
+        logActivity('devices_detected', { devices, count: devices.length });
+      }}
+      enableTabSwitchDetection={true}
+      enableDeviceScanning={true}
+    >
+      <div dir={dir} lang={locale} style={{ 
+        minHeight: '100vh', 
+        width: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        margin: 0,
+        padding: 0
+      }}>
       {/* Add style tag for no-copy functionality */}
       <style dangerouslySetInnerHTML={{ __html: noCopyStyle }} />
       
@@ -1201,5 +1242,6 @@ export default function AttemptPage() {
         `
       }} />
     </div>
+    </ScreenshotProtection>
   );
 }

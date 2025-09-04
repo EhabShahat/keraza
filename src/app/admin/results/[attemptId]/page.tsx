@@ -216,13 +216,38 @@ export default function AdminAttemptDetails() {
                 return acc;
               }, {} as Record<string, number>);
               const keys = Object.keys(counts).sort();
+              
+              // Separate security events from regular events
+              const securityEvents = ['tab_switch', 'tab_focus', 'security_violation', 'devices_detected', 'screenshot_attempt'];
+              const securityKeys = keys.filter(k => securityEvents.includes(k));
+              const regularKeys = keys.filter(k => !securityEvents.includes(k));
+              
               return keys.length > 0 ? (
-                <div className="text-xs text-gray-700 mb-2 flex flex-wrap gap-2">
-                  {keys.map((k) => (
-                    <span key={k} className="border rounded px-2 py-1">
-                      {k}: {counts[k]}
-                    </span>
-                  ))}
+                <div className="text-xs mb-2 space-y-2">
+                  {securityKeys.length > 0 && (
+                    <div>
+                      <div className="text-red-700 font-semibold mb-1">🚨 Security Events:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {securityKeys.map((k) => (
+                          <span key={k} className="border border-red-300 bg-red-50 text-red-700 rounded px-2 py-1">
+                            {k}: {counts[k]}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {regularKeys.length > 0 && (
+                    <div>
+                      <div className="text-gray-700 font-semibold mb-1">📊 Regular Events:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {regularKeys.map((k) => (
+                          <span key={k} className="border rounded px-2 py-1">
+                            {k}: {counts[k]}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : null;
             })()}
@@ -242,12 +267,69 @@ export default function AdminAttemptDetails() {
                     {items.map((ev: any, idx: number) => {
                       const t = ev?.event_time || ev?.created_at;
                       const when = t ? new Date(t).toLocaleString() : "-";
+                      const eventType = ev?.event_type || "-";
+                      const isSecurityEvent = ['tab_switch', 'tab_focus', 'security_violation', 'devices_detected', 'screenshot_attempt'].includes(eventType);
+                      
                       return (
-                        <tr key={idx} className="border-t align-top">
+                        <tr key={idx} className={`border-t align-top ${isSecurityEvent ? 'bg-red-50' : ''}`}>
                           <td className="p-2 border text-xs whitespace-nowrap">{when}</td>
-                          <td className="p-2 border text-sm">{ev?.event_type || "-"}</td>
+                          <td className={`p-2 border text-sm ${isSecurityEvent ? 'text-red-700 font-semibold' : ''}`}>
+                            {isSecurityEvent && '🚨 '}
+                            {eventType}
+                          </td>
                           <td className="p-2 border text-xs">
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(ev?.payload ?? {}, null, 2)}</pre>
+                            {(() => {
+                              const payload = ev?.payload ?? {};
+                              
+                              // Enhanced display for security events
+                              if (eventType === 'tab_switch' && payload.action === 'tab_hidden') {
+                                return (
+                                  <div className="text-red-700">
+                                    <div className="font-semibold">Student switched away from exam tab</div>
+                                    <div className="text-xs mt-1">URL: {payload.url}</div>
+                                    <div className="text-xs">Time: {new Date(payload.timestamp).toLocaleString()}</div>
+                                  </div>
+                                );
+                              }
+                              
+                              if (eventType === 'tab_focus' && payload.action === 'tab_visible') {
+                                return (
+                                  <div className="text-green-700">
+                                    <div className="font-semibold">Student returned to exam tab</div>
+                                    <div className="text-xs mt-1">URL: {payload.url}</div>
+                                    <div className="text-xs">Time: {new Date(payload.timestamp).toLocaleString()}</div>
+                                  </div>
+                                );
+                              }
+                              
+                              if (eventType === 'devices_detected') {
+                                return (
+                                  <div className="text-orange-700">
+                                    <div className="font-semibold">{payload.count} devices detected</div>
+                                    <div className="text-xs mt-1">
+                                      {payload.devices?.map((device: any, i: number) => (
+                                        <div key={i} className="mb-1">
+                                          <span className="font-medium">{device.type}:</span> {device.name || device.productName || 'Unknown'}
+                                          {device.connected !== undefined && ` (${device.connected ? 'Connected' : 'Disconnected'})`}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              
+                              if (eventType === 'security_violation') {
+                                return (
+                                  <div className="text-red-700">
+                                    <div className="font-semibold">Security violation: {payload.type}</div>
+                                    <div className="text-xs mt-1">Time: {new Date(payload.timestamp).toLocaleString()}</div>
+                                  </div>
+                                );
+                              }
+                              
+                              // Default JSON display for other events
+                              return <pre className="whitespace-pre-wrap">{JSON.stringify(payload, null, 2)}</pre>;
+                            })()}
                           </td>
                         </tr>
                       );

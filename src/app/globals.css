@@ -1102,3 +1102,65 @@ body {
   min-height: 100vh; /* Fallback for older browsers */
   min-height: 100svh; /* Modern browsers with small viewport height support */
 }
+
+/* Screenshot protection for exam pages */
+.exam-protected {
+  /* Prevent screenshots on mobile devices */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  /* Prevent right-click context menu */
+  pointer-events: auto;
+  
+  /* CSS-based screenshot protection */
+  -webkit-app-region: no-drag;
+  
+  /* Additional mobile protection */
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Prevent text selection and copying */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide content during screenshot attempts (iOS/Android) */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .exam-protected {
+    /* Additional WebKit-specific protection */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* Screenshot detection overlay */
+.screenshot-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Blur content when screenshot is detected */
+.content-blurred {
+  filter: blur(20px);
+  pointer-events: none;
+}
