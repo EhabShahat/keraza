@@ -506,9 +506,7 @@ export default function AttemptPage() {
 
   const disabled = state.completion_status === "submitted";
   const progressPercentage = total ? Math.round((answered / total) * 100) : 0;
-<<<<<<< HEAD
   const unansweredCount = Math.max(0, total - answered);
-=======
 
   // Sidebar/layout measurements and RTL-aware positioning to avoid overflow
   const sidebarWidth = sidebarCollapsed ? 48 : 200;
@@ -519,7 +517,6 @@ export default function AttemptPage() {
   const mainPaddingProps: any = dir === 'rtl'
     ? { paddingRight: sidebarWidthPx }
     : { paddingLeft: sidebarWidthPx };
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 
   return (
     <div dir={dir} lang={locale} style={{ 
@@ -702,18 +699,6 @@ export default function AttemptPage() {
         {/* Sidebar - Fixed to Screen */}
         <aside style={{
           backgroundColor: 'var(--card)',
-<<<<<<< HEAD
-          borderRight: '1px solid var(--border)',
-          width: sidebarCollapsed ? '48px' : '200px',
-          minWidth: sidebarCollapsed ? '48px' : '200px',
-          height: `calc(100vh - ${headerHeight}px)`,
-          position: 'fixed',
-          left: 0,
-          top: `${headerHeight}px`, // Below fixed header
-          zIndex: 40,
-          overflow: 'auto',
-          padding: '0.5rem'
-=======
           width: sidebarWidthPx,
           minWidth: sidebarWidthPx,
           height: `calc(100vh - ${headerHeight}px)`,
@@ -723,7 +708,6 @@ export default function AttemptPage() {
           overflow: 'auto',
           padding: '0.5rem',
           ...asidePositionProps,
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
         }}>
           <div style={{ 
             display: 'flex', 
@@ -810,18 +794,11 @@ export default function AttemptPage() {
             flex: 1,
             padding: '1rem',
             overflow: 'auto',
-<<<<<<< HEAD
-            width: `calc(100% - ${sidebarCollapsed ? '48px' : '200px'})`, // Full width minus sidebar
-            marginLeft: sidebarCollapsed ? '48px' : '200px', // Offset for fixed sidebar
-            height: `calc(100vh - ${headerHeight}px)`, // Full height minus header
-            position: 'relative'
-=======
             width: '100%',
             height: `calc(100vh - ${headerHeight}px)`, // Full height minus header
             position: 'relative',
             boxSizing: 'border-box',
             ...mainPaddingProps,
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           }}
           onCopy={(e) => e.preventDefault()} 
           onCut={(e) => e.preventDefault()}
@@ -993,18 +970,9 @@ export default function AttemptPage() {
 
       {/* Submit Confirmation Modal */}
       {showSubmitConfirm && (
-<<<<<<< HEAD
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="submitConfirmTitle"
-          tabIndex={-1}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' && !submitting) setShowSubmitConfirm(false);
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !submitting) setShowSubmitConfirm(false);
-          }}
           style={{
             position: 'fixed',
             top: 0,
@@ -1015,53 +983,31 @@ export default function AttemptPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 50,
+            zIndex: 100,
             padding: '1rem'
           }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowSubmitConfirm(false);
+            }
+          }}
         >
-=======
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50,
-          padding: '1rem'
-        }}>
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
           <div style={{
             backgroundColor: 'var(--card)',
             borderRadius: '0.5rem',
             padding: '1.5rem',
-<<<<<<< HEAD
             maxWidth: '460px',
             width: '100%',
             border: '1px solid var(--border)',
-            textAlign: 'center'
-          }}>
-            <h3 id="submitConfirmTitle" style={{ 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-=======
-            maxWidth: '400px',
-            width: '100%',
-            border: '1px solid var(--border)'
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
           }}>
             <h3 style={{ 
               fontSize: '1.125rem', 
               fontWeight: '600', 
-              marginBottom: '1rem',
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
               margin: '0 0 1rem 0'
             }}>
               {t(locale, 'submit_exam_q')}
             </h3>
-<<<<<<< HEAD
 
             {/* Summary */}
             <div style={{
@@ -1108,77 +1054,43 @@ export default function AttemptPage() {
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ height: '8px', background: 'var(--muted)', borderRadius: '9999px' }}>
-                <div style={{ height: '8px', width: `${progressPercentage}%`, background: '#2563eb', borderRadius: '9999px', transition: 'width 0.2s ease' }} />
-              </div>
-            </div>
-
-            {/* Warning */}
-            <div style={{ 
-              backgroundColor: '#fff7ed',
-              border: '1px solid #ffedd5',
-              color: '#9a3412',
-              borderRadius: '0.375rem',
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{t(locale, 'warning')}</div>
-              <div style={{ lineHeight: 1.5 }}>
-                <div>{t(locale, 'cannot_be_undone')}</div>
-                {unansweredCount > 0 && (
-                  <div>{t(locale, 'unanswered_warning', { count: unansweredCount })}</div>
-                )}
-              </div>
-            </div>
-
-            <div style={{ 
-              display: 'flex', 
-              gap: '0.75rem', 
-              justifyContent: 'center'
-=======
-            <div style={{ 
-              color: 'var(--muted-foreground)', 
-              marginBottom: '1rem',
-              lineHeight: '1.5',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              rowGap: '0.5rem',
-              columnGap: '1rem'
-            }}>
-              <div><strong>{t(locale, 'total_questions')}</strong> {total}</div>
-              <div><strong>{t(locale, 'answered_label')}</strong> {answered}</div>
-              <div><strong>{t(locale, 'unanswered_label')}</strong> {Math.max(0, (total - answered))}</div>
-              <div><strong>{t(locale, 'progress_label')}</strong> {progressPercentage}%</div>
-            </div>
-            <p style={{ 
-              color: 'var(--muted-foreground)', 
-              marginBottom: '1rem',
-              lineHeight: '1.5',
-              margin: '0 0 1rem 0'
-            }}>
-              {t(locale, 'cannot_be_undone')}
-            </p>
-            {(total - answered) > 0 && (
+            {unansweredCount > 0 && (
               <div style={{
-                backgroundColor: '#FEF3C7',
-                border: '1px solid #F59E0B',
-                color: '#92400E',
+                backgroundColor: '#fef3c7',
+                border: '1px solid #fbbf24',
                 borderRadius: '0.375rem',
                 padding: '0.75rem',
                 marginBottom: '1rem'
               }}>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{t(locale, 'warning')}</div>
-                <div>{t(locale, 'unanswered_warning', { count: Math.max(0, (total - answered)) })}</div>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  marginBottom: '0.25rem'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                    <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                  </svg>
+                  <span style={{ fontWeight: '600', color: '#92400e' }}>{t(locale, 'warning')}</span>
+                </div>
+                <p style={{ color: '#92400e', margin: 0, fontSize: '0.875rem' }}>
+                  {t(locale, 'unanswered_warning', { count: unansweredCount })}
+                </p>
               </div>
             )}
+
+            <p style={{ 
+              color: 'var(--muted-foreground)', 
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem'
+            }}>
+              {t(locale, 'cannot_be_undone')}
+            </p>
+
             <div style={{ 
               display: 'flex', 
               gap: '0.75rem', 
               justifyContent: 'flex-end'
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
             }}>
               <button 
                 className="btn btn-outline"
@@ -1189,13 +1101,25 @@ export default function AttemptPage() {
               </button>
               <button 
                 className="btn btn-primary"
-                onClick={() => {
-                  setShowSubmitConfirm(false);
-                  onSubmit();
-                }}
+                onClick={onSubmit}
                 disabled={submitting}
               >
-                {t(locale, 'confirm_submit_exam')}
+                {submitting ? (
+                  <>
+                    <div style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      border: '2px solid white', 
+                      borderTop: '2px solid transparent', 
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      marginRight: '0.5rem'
+                    }}></div>
+                    {t(locale, 'submitting')}
+                  </>
+                ) : (
+                  t(locale, 'confirm_submit_exam')
+                )}
               </button>
             </div>
           </div>

@@ -146,8 +146,6 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     home: "Home",
     results: "Results",
     
-<<<<<<< HEAD
-=======
     // Multi-exam selection UI
     select_exam: "Exam Access",
     find_exams: "Find Exams",
@@ -159,7 +157,6 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     returning_to_exam_selection: "Returning to exam selection...",
     go_to_exam_selection: "Go to exam selection",
     
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Time warnings
     time_warning: "Time Warning",
     one_hour_remaining: "Only 1 hour remaining! Please manage your time carefully.",
@@ -295,8 +292,6 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     home: "الصفحة الرئيسية",
     results: "النتائج",
     
-<<<<<<< HEAD
-=======
     // Multi-exam selection UI
     select_exam: "دخول الاختبار",
     find_exams: "اعرض الاختبارات",
@@ -308,7 +303,6 @@ const dict: Record<StudentLocale, Record<string, string>> = {
     returning_to_exam_selection: "سيتم إعادتك إلى اختيار الاختبار...",
     go_to_exam_selection: "العودة لاختيار الاختبار",
     
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
     // Time warnings
     time_warning: "تحذير الوقت",
     one_hour_remaining: "باقي ساعة واحدة فقط! يرجى إدارة وقتك بعناية.",
