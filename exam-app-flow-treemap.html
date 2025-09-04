@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam App Flow - Treemap</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .treemap {
+            width: 100%;
+            height: 800px;
+        }
+        .node {
+            stroke: #fff;
+            stroke-width: 2px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .node:hover {
+            opacity: 0.8;
+        }
+        .node-text {
+            font-size: 12px;
+            font-weight: bold;
+            fill: white;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+        .node-subtext {
+            font-size: 10px;
+            fill: rgba(255,255,255,0.9);
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+        .legend {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        .legend-item {
+            display: inline-block;
+            margin: 5px 15px;
+            font-size: 14px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Advanced Exam Application - Flow Treemap</h1>
+            <p>Interactive visualization of user flows and system components</p>
+        </div>
+        <svg class="treemap" id="treemap"></svg>
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #3b82f6;"></span>
+                Student Flow
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #ef4444;"></span>
+                Admin Flow
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #10b981;"></span>
+                System Features
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #f59e0b;"></span>
+                Data Management
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #8b5cf6;"></span>
+                Security & Monitoring
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            name: "Exam Application",
+            children: [
+                {
+                    name: "Student Flow",
+                    category: "student",
+                    children: [
+                        {
+                            name: "Exam Entry",
+                            category: "student",
+                            value: 25,
+                            details: "Enter unique code\nValidate access\nRedirect to attempt"
+                        },
+                        {
+                            name: "Taking Exam",
+                            category: "student",
+                            value: 40,
+                            details: "Answer questions\nAuto-save progress\nTimer countdown\nOffline recovery"
+                        },
+                        {
+                            name: "Submit & Results",
+                            category: "student",
+                            value: 20,
+                            details: "Final submission\nView results\nOne attempt limit"
+                        }
+                    ]
+                },
+                {
+                    name: "Admin Flow",
+                    category: "admin",
+                    children: [
+                        {
+                            name: "Exam Management",
+                            category: "admin",
+                            value: 35,
+                            details: "Create exams\nManage questions\nDrag-drop reorder\nSettings config"
+                        },
+                        {
+                            name: "Student Management",
+                            category: "admin",
+                            value: 30,
+                            details: "Global student codes\nBulk operations\nWhatsApp integration\nCode distribution"
+                        },
+                        {
+                            name: "Results & Analytics",
+                            category: "admin",
+                            value: 25,
+                            details: "View results\nExport data\nPerformance metrics\nStatistics dashboard"
+                        },
+                        {
+                            name: "Live Monitoring",
+                            category: "admin",
+                            value: 20,
+                            details: "Real-time activity\nAttempt tracking\nIP monitoring\nLive dashboard"
+                        }
+                    ]
+                },
+                {
+                    name: "System Features",
+                    category: "system",
+                    children: [
+                        {
+                            name: "Real-time Sync",
+                            category: "system",
+                            value: 20,
+                            details: "Supabase real-time\nAuto-save\nLive updates\nOffline support"
+                        },
+                        {
+                            name: "Question Randomization",
+                            category: "system",
+                            value: 15,
+                            details: "Seedrandom\nDeterministic shuffle\nAnti-cheating\nFair distribution"
+                        },
+                        {
+                            name: "WhatsApp Integration",
+                            category: "system",
+                            value: 18,
+                            details: "Cloud API\nCode sending\nDeep links\nPre-filled messages"
+                        }
+                    ]
+                },
+                {
+                    name: "Data Management",
+                    category: "data",
+                    children: [
+                        {
+                            name: "Import/Export",
+                            category: "data",
+                            value: 25,
+                            details: "CSV/XLSX support\nBulk operations\nPapa Parse\nXLSX library"
+                        },
+                        {
+                            name: "Database Schema",
+                            category: "data",
+                            value: 30,
+                            details: "PostgreSQL\nRLS policies\nRPC functions\nIndexes & performance"
+                        },
+                        {
+                            name: "File Processing",
+                            category: "data",
+                            value: 20,
+                            details: "PDF generation\nChart visualization\nData validation\nFile uploads"
+                        }
+                    ]
+                },
+                {
+                    name: "Security & Monitoring",
+                    category: "security",
+                    children: [
+                        {
+                            name: "Authentication",
+                            category: "security",
+                            value: 25,
+                            details: "JWT tokens\nSupabase Auth\nAdmin guards\nSession management"
+                        },
+                        {
+                            name: "Audit Logging",
+                            category: "security",
+                            value: 20,
+                            details: "Comprehensive logs\nAction tracking\nIP recording\nSecurity trails"
+                        },
+                        {
+                            name: "Access Control",
+                            category: "security",
+                            value: 22,
+                            details: "RLS policies\nAttempt validation\nIP tracking\nOne attempt rule"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const colorMap = {
+            student: "#3b82f6",
+            admin: "#ef4444", 
+            system: "#10b981",
+            data: "#f59e0b",
+            security: "#8b5cf6"
+        };
+
+        const width = 1160;
+        const height = 800;
+
+        const svg = d3.select("#treemap")
+            .attr("width", width)
+            .attr("height", height);
+
+        const treemap = d3.treemap()
+            .size([width, height])
+            .padding(2)
+            .round(true);
+
+        const root = d3.hierarchy(data)
+            .sum(d => d.value || 0)
+            .sort((a, b) => b.value - a.value);
+
+        treemap(root);
+
+        const leaf = svg.selectAll("g")
+            .data(root.leaves())
+            .enter().append("g")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        leaf.append("rect")
+            .attr("class", "node")
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0)
+            .attr("fill", d => colorMap[d.data.category])
+            .attr("rx", 4);
+
+        leaf.append("text")
+            .attr("class", "node-text")
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", d => (d.y1 - d.y0) / 2 - 10)
+            .text(d => d.data.name)
+            .each(function(d) {
+                const text = d3.select(this);
+                const words = d.data.name.split(/\s+/);
+                const lineHeight = 14;
+                const maxWidth = d.x1 - d.x0 - 10;
+                
+                text.text(null);
+                
+                let line = [];
+                let lineNumber = 0;
+                
+                words.forEach(word => {
+                    line.push(word);
+                    const testLine = line.join(" ");
+                    const testLength = testLine.length * 7; // Approximate character width
+                    
+                    if (testLength > maxWidth && line.length > 1) {
+                        line.pop();
+                        text.append("tspan")
+                            .attr("x", (d.x1 - d.x0) / 2)
+                            .attr("y", (d.y1 - d.y0) / 2 - 10 + lineNumber * lineHeight)
+                            .text(line.join(" "));
+                        line = [word];
+                        lineNumber++;
+                    }
+                });
+                
+                text.append("tspan")
+                    .attr("x", (d.x1 - d.x0) / 2)
+                    .attr("y", (d.y1 - d.y0) / 2 - 10 + lineNumber * lineHeight)
+                    .text(line.join(" "));
+            });
+
+        leaf.append("text")
+            .attr("class", "node-subtext")
+            .attr("x", d => (d.x1 - d.x0) / 2)
+            .attr("y", d => (d.y1 - d.y0) / 2 + 25)
+            .text(d => d.data.details ? d.data.details.split('\n')[0] : "")
+            .each(function(d) {
+                if (!d.data.details) return;
+                
+                const text = d3.select(this);
+                const lines = d.data.details.split('\n');
+                const lineHeight = 12;
+                const maxLines = Math.floor((d.y1 - d.y0 - 60) / lineHeight);
+                
+                text.text(null);
+                
+                lines.slice(0, maxLines).forEach((line, i) => {
+                    text.append("tspan")
+                        .attr("x", (d.x1 - d.x0) / 2)
+                        .attr("y", (d.y1 - d.y0) / 2 + 25 + i * lineHeight)
+                        .text(line);
+                });
+            });
+
+        // Add tooltips
+        leaf.append("title")
+            .text(d => `${d.data.name}\n${d.data.details || ''}\nSize: ${d.value}`);
+
+    </script>
+</body>
+</html>
