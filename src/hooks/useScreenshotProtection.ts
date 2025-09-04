@@ -109,6 +109,13 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
   const detectDevTools = useCallback(() => {
     if (!enableDevToolsBlocking) return;
 
+    // Skip detection on mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     window.innerWidth <= 768 || 
+                     'ontouchstart' in window;
+    
+    if (isMobile) return;
+
     const threshold = 160;
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
