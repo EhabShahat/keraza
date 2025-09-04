@@ -16,6 +16,11 @@ interface AuditLog {
   meta: any;
   resource_type?: string;
   resource_id?: string;
+  user_id?: string;
+  users?: {
+    email: string;
+    raw_user_meta_data: any;
+  };
 }
 
 export default function AdminAuditPage() {
@@ -118,7 +123,12 @@ export default function AdminAuditPage() {
       case "actor":
         return (
           <div className="text-sm">
-            <div className="font-medium text-gray-900">{log.actor}</div>
+            <div className="font-medium text-gray-900">
+              {log.users?.email || log.actor}
+            </div>
+            {log.users?.email && log.actor !== log.users.email && (
+              <div className="text-xs text-gray-500">({log.actor})</div>
+            )}
           </div>
         );
       case "action":

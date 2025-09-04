@@ -31,6 +31,8 @@ type Admin = {
   id: string;
   email: string;
   created_at: string;
+  username?: string;
+  raw_user_meta_data?: any;
 };
 
 export default function AdminSettingsPage() {
@@ -653,6 +655,7 @@ export default function AdminSettingsPage() {
                     <table className="w-full">
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Username</th>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Added</th>
                           <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Actions</th>
@@ -661,6 +664,11 @@ export default function AdminSettingsPage() {
                       <tbody className="divide-y divide-gray-200">
                         {admins.map((admin) => (
                           <tr key={admin.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4">
+                              <div className="font-medium text-gray-900">
+                                {admin.username || admin.raw_user_meta_data?.username || 'N/A'}
+                              </div>
+                            </td>
                             <td className="px-6 py-4">
                               <div className="font-medium text-gray-900">{admin.email}</div>
                             </td>
@@ -684,7 +692,7 @@ export default function AdminSettingsPage() {
                         ))}
                         {admins.length === 0 && (
                           <tr>
-                            <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                            <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                               No administrators found
                             </td>
                           </tr>
