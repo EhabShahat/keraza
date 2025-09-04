@@ -258,34 +258,52 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     };
   }, [showWarning, onScreenshotDetected]);
 
-  // Detect iOS screenshot gesture (home + power button)
+  // Detect iOS screenshot gesture (home + power button) - DISABLED to prevent false positives
   const detectIOSScreenshot = useCallback(() => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (!isIOS) return;
 
-    let touchStartTime = 0;
-    let touchCount = 0;
+    // Disabled overly sensitive touch detection that triggers on normal gestures
+    // Only keep clipboard monitoring for actual screenshot detection
+    let lastScreenshotCheck = 0;
 
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartTime = Date.now();
-      touchCount = e.touches.length;
+    const checkClipboard = async () => {
+      const now = Date.now();
+      if (now - lastScreenshotCheck < 2000) return; // Cooldown period
+      
+      try {
+        if (navigator.clipboard && navigator.clipboard.read) {
+          const clipboardItems = await navigator.clipboard.read();
+          for (const item of clipboardItems) {
+            if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+              showWarning('Screenshot detected in clipboard!');
+              onScreenshotDetected?.();
+              lastScreenshotCheck = now;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        // Clipboard access denied - this is normal
+      }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touchDuration = Date.now() - touchStartTime;
-      
-      // iOS screenshot typically involves simultaneous button press
-      // We detect rapid multi-touch followed by quick release
-      if (touchCount >= 2 && touchDuration < 200) {
-        showWarning('iOS screenshot gesture detected!');
-        onScreenshotDetected?.();
-      }
+    // Check clipboard periodically instead of on every touch
+    const intervalId = setInterval(checkClipboard, 3000);
+
+    const handleTouchStart = () => {
+      // Removed aggressive touch detection
+    };
+
+    const handleTouchEnd = () => {
+      // Removed aggressive touch detection
     };
 
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
+      clearInterval(intervalId);
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchend', handleTouchEnd);
     };
