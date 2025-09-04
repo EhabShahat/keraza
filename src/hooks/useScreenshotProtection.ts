@@ -18,6 +18,7 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
   const [isProtected, setIsProtected] = useState(false);
   const [warningVisible, setWarningVisible] = useState(false);
   const [suspiciousActivity, setSuspiciousActivity] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(true);
 
   const {
     onScreenshotDetected,
@@ -50,12 +51,18 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     const blockedKeys = [
       // Windows screenshot shortcuts
       { key: 'PrintScreen', message: 'Screenshot attempt detected!' },
+      { key: 'F2', message: 'Screenshot attempt detected!' }, // Some devices use F2
       { key: 'F12', message: 'Developer tools blocked!' },
+      // Windows + Print Screen combinations
+      { key: 'PrintScreen', meta: true, message: 'Screenshot attempt detected!' },
+      { key: 'PrintScreen', alt: true, message: 'Screenshot attempt detected!' },
       // Mac screenshot shortcuts
       { key: 's', meta: true, shift: true, message: 'Screenshot attempt detected!' },
       { key: '3', meta: true, shift: true, message: 'Screenshot attempt detected!' },
       { key: '4', meta: true, shift: true, message: 'Screenshot attempt detected!' },
       { key: '5', meta: true, shift: true, message: 'Screenshot attempt detected!' },
+      // Additional Windows shortcuts
+      { key: 's', meta: true, shift: true, message: 'Screenshot attempt detected!' }, // Win+Shift+S
       // Developer tools shortcuts
       { key: 'F12', message: 'Developer tools blocked!' },
       { key: 'i', ctrl: true, shift: true, message: 'Developer tools blocked!' },
@@ -125,6 +132,261 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
       onScreenshotDetected?.();
     }
   }, [enableDevToolsBlocking, showWarning, onScreenshotDetected]);
+
+  // Mobile screenshot detection methods
+  const detectMobileScreenshot = useCallback(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     'ontouchstart' in window;
+    
+    if (!isMobile) return;
+
+    // Method 1: Detect volume down + power button combination (Android)
+    let volumeDownPressed = false;
+    let powerButtonPressed = false;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'VolumeDown' || e.code === 'VolumeDown') {
+        volumeDownPressed = true;
+      }
+      if (e.key === 'Power' || e.code === 'Power') {
+        powerButtonPressed = true;
+      }
+      
+      if (volumeDownPressed && powerButtonPressed) {
+        showWarning('Screenshot attempt detected on mobile device!');
+        onScreenshotDetected?.();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'VolumeDown' || e.code === 'VolumeDown') {
+        volumeDownPressed = false;
+      }
+      if (e.key === 'Power' || e.code === 'Power') {
+        powerButtonPressed = false;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [showWarning, onScreenshotDetected]);
+
+  // Detect screen recording and screenshot via Page Visibility API changes
+  const detectScreenCapture = useCallback(() => {
+    let lastVisibilityChange = Date.now();
+    let suspiciousActivityCount = 0;
+
+    const handleVisibilityChange = () => {
+      const now = Date.now();
+      const timeSinceLastChange = now - lastVisibilityChange;
+      
+      // Rapid visibility changes might indicate screenshot/recording
+      if (timeSinceLastChange < 100) {
+        suspiciousActivityCount++;
+        
+        if (suspiciousActivityCount > 3) {
+          showWarning('Suspicious screen capture activity detected!');
+          onScreenshotDetected?.();
+          suspiciousActivityCount = 0; // Reset counter
+        }
+      } else {
+        suspiciousActivityCount = Math.max(0, suspiciousActivityCount - 1);
+      }
+      
+      lastVisibilityChange = now;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [showWarning, onScreenshotDetected]);
+
+  // Detect iOS screenshot gesture (home + power button)
+  const detectIOSScreenshot = useCallback(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (!isIOS) return;
+
+    let touchStartTime = 0;
+    let touchCount = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartTime = Date.now();
+      touchCount = e.touches.length;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchDuration = Date.now() - touchStartTime;
+      
+      // iOS screenshot typically involves simultaneous button press
+      // We detect rapid multi-touch followed by quick release
+      if (touchCount >= 2 && touchDuration < 200) {
+        showWarning('iOS screenshot gesture detected!');
+        onScreenshotDetected?.();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [showWarning, onScreenshotDetected]);
+
+  // Add CSS-based mobile screenshot protection
+  const addMobileScreenshotCSS = useCallback(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     'ontouchstart' in window;
+    
+    if (!isMobile) return;
+
+    // Create style element for mobile protection
+    const style = document.createElement('style');
+    style.id = 'mobile-screenshot-protection';
+    style.textContent = `
+      /* Prevent screenshot on Android */
+      body {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        -khtml-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+      
+      /* Additional mobile protections */
+      * {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        pointer-events: auto !important;
+      }
+      
+      /* Prevent long press context menu */
+      img, video, canvas {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        pointer-events: none !important;
+      }
+      
+      /* Hide content during potential screenshot */
+      @media screen and (max-width: 768px) {
+        .screenshot-blur {
+          filter: blur(10px) !important;
+          opacity: 0.3 !important;
+          transition: all 0.1s ease !important;
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
+    
+    return () => {
+      const existingStyle = document.getElementById('mobile-screenshot-protection');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
+  // Detect Android screenshot notification
+  const detectAndroidScreenshot = useCallback(() => {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (!isAndroid) return;
+
+    // Monitor for rapid page visibility changes that might indicate screenshot
+    let visibilityChangeCount = 0;
+    let lastChangeTime = Date.now();
+
+    const handleAndroidVisibilityChange = () => {
+      const now = Date.now();
+      const timeDiff = now - lastChangeTime;
+      
+      if (timeDiff < 500) { // Rapid changes within 500ms
+        visibilityChangeCount++;
+        
+        if (visibilityChangeCount >= 2) {
+          showWarning('Android screenshot detected!');
+          onScreenshotDetected?.();
+          
+          // Temporarily blur content
+          document.body.classList.add('screenshot-blur');
+          setTimeout(() => {
+            document.body.classList.remove('screenshot-blur');
+          }, 2000);
+          
+          visibilityChangeCount = 0;
+        }
+      } else {
+        visibilityChangeCount = 0;
+      }
+      
+      lastChangeTime = now;
+    };
+
+    document.addEventListener('visibilitychange', handleAndroidVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleAndroidVisibilityChange);
+    };
+  }, [showWarning, onScreenshotDetected]);
+
+  // Detect screen recording via media devices
+  const detectScreenRecording = useCallback(async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      // Monitor for new video devices that might indicate screen recording
+      const checkForRecording = async () => {
+        try {
+          const currentDevices = await navigator.mediaDevices.enumerateDevices();
+          const currentVideoDevices = currentDevices.filter(device => device.kind === 'videoinput');
+          
+          if (currentVideoDevices.length > videoDevices.length) {
+            showWarning('Screen recording device detected!');
+            onScreenshotDetected?.();
+          }
+        } catch (error) {
+          // Silently handle permission errors
+        }
+      };
+
+      const recordingCheckInterval = setInterval(checkForRecording, 5000);
+      
+      return () => {
+        clearInterval(recordingCheckInterval);
+      };
+    } catch (error) {
+      // Silently handle errors
+    }
+  }, [showWarning, onScreenshotDetected]);
+
+  // Window focus/blur handlers
+  const handleWindowBlur = useCallback(() => {
+    if (enableTabSwitchDetection) {
+      onTabSwitch?.({ hidden: true, timestamp: Date.now() });
+      showWarning('Window lost focus during exam!');
+    }
+  }, [enableTabSwitchDetection, onTabSwitch, showWarning]);
+
+  const handleWindowFocus = useCallback(() => {
+    if (enableTabSwitchDetection) {
+      onTabSwitch?.({ hidden: false, timestamp: Date.now() });
+    }
+  }, [enableTabSwitchDetection, onTabSwitch]);
 
   // Enhanced tab switching detection
   const handleVisibilityChange = useCallback(() => {
@@ -212,12 +474,102 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     }
   }, [enableDeviceScanning, onDeviceDetected, onSuspiciousActivity]);
 
-  // Monitor for new device connections
-  const handleDeviceChange = useCallback(() => {
-    if (enableDeviceScanning) {
-      setTimeout(scanForDevices, 1000); // Delay to allow device enumeration
+  // Setup event listeners
+  useEffect(() => {
+    if (!isActive) return;
+
+    const cleanupFunctions: (() => void)[] = [];
+
+    // Keyboard blocking
+    if (enableKeyboardBlocking) {
+      document.addEventListener('keydown', handleKeyDown);
+      cleanupFunctions.push(() => document.removeEventListener('keydown', handleKeyDown));
     }
-  }, [enableDeviceScanning, scanForDevices]);
+
+    // Right-click blocking
+    if (enableRightClickBlocking) {
+      document.addEventListener('contextmenu', handleRightClick);
+      cleanupFunctions.push(() => document.removeEventListener('contextmenu', handleRightClick));
+    }
+
+    // Text selection blocking
+    document.addEventListener('selectstart', handleSelectStart);
+    document.addEventListener('dragstart', handleDragStart);
+    cleanupFunctions.push(() => {
+      document.removeEventListener('selectstart', handleSelectStart);
+      document.removeEventListener('dragstart', handleDragStart);
+    });
+
+    // Developer tools detection
+    const devToolsInterval = setInterval(detectDevTools, 1000);
+    cleanupFunctions.push(() => clearInterval(devToolsInterval));
+
+    // Mobile screenshot detection
+    const mobileCleanup = detectMobileScreenshot();
+    if (mobileCleanup) cleanupFunctions.push(mobileCleanup);
+
+    // Screen capture detection
+    const captureCleanup = detectScreenCapture();
+    if (captureCleanup) cleanupFunctions.push(captureCleanup);
+
+    // iOS screenshot detection
+    const iosCleanup = detectIOSScreenshot();
+    if (iosCleanup) cleanupFunctions.push(iosCleanup);
+
+    // CSS-based mobile protection
+    const cssCleanup = addMobileScreenshotCSS();
+    if (cssCleanup) cleanupFunctions.push(cssCleanup);
+
+    // Android screenshot detection
+    const androidCleanup = detectAndroidScreenshot();
+    if (androidCleanup) cleanupFunctions.push(androidCleanup);
+
+    // Screen recording detection
+    detectScreenRecording().then(recordingCleanup => {
+      if (recordingCleanup) cleanupFunctions.push(recordingCleanup);
+    });
+
+    // Tab switching detection
+    if (enableTabSwitchDetection) {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('blur', handleWindowBlur);
+      window.addEventListener('focus', handleWindowFocus);
+      cleanupFunctions.push(() => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('blur', handleWindowBlur);
+        window.removeEventListener('focus', handleWindowFocus);
+      });
+    }
+
+    // Device scanning
+    if (enableDeviceScanning) {
+      scanForDevices();
+      const deviceScanInterval = setInterval(scanForDevices, 30000); // Scan every 30 seconds
+      cleanupFunctions.push(() => clearInterval(deviceScanInterval));
+    }
+
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup());
+    };
+  }, [
+    isActive,
+    enableKeyboardBlocking,
+    enableRightClickBlocking,
+    enableTabSwitchDetection,
+    enableDeviceScanning,
+    handleKeyDown,
+    handleRightClick,
+    handleSelectStart,
+    handleDragStart,
+    detectDevTools,
+    detectMobileScreenshot,
+    detectScreenCapture,
+    detectIOSScreenshot,
+    handleVisibilityChange,
+    handleWindowBlur,
+    handleWindowFocus,
+    scanForDevices
+  ]);
 
   const enableProtection = useCallback(() => {
     setIsProtected(true);
@@ -237,8 +589,8 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
     
     // Monitor for device changes
     if ('usb' in navigator) {
-      (navigator as any).usb.addEventListener('connect', handleDeviceChange);
-      (navigator as any).usb.addEventListener('disconnect', handleDeviceChange);
+      (navigator as any).usb.addEventListener('connect', scanForDevices);
+      (navigator as any).usb.addEventListener('disconnect', scanForDevices);
     }
     
     // Periodic device scanning
@@ -259,15 +611,15 @@ export function useScreenshotProtection(options: ScreenshotProtectionOptions = {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       
       if ('usb' in navigator) {
-        (navigator as any).usb.removeEventListener('connect', handleDeviceChange);
-        (navigator as any).usb.removeEventListener('disconnect', handleDeviceChange);
+        (navigator as any).usb.removeEventListener('connect', scanForDevices);
+        (navigator as any).usb.removeEventListener('disconnect', scanForDevices);
       }
       
       // Restore text selection
       document.body.style.userSelect = '';
       document.body.style.webkitUserSelect = '';
     };
-  }, [handleKeyDown, handleRightClick, handleSelectStart, handleDragStart, handleVisibilityChange, detectDevTools, scanForDevices, handleDeviceChange]);
+  }, [handleKeyDown, handleRightClick, handleSelectStart, handleDragStart, handleVisibilityChange, detectDevTools, scanForDevices]);
 
   const disableProtection = useCallback(() => {
     setIsProtected(false);

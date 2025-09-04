@@ -130,6 +130,48 @@ export default function AttemptPage() {
   useEffect(() => {
     if (!attemptId) return;
     
+    const loadAttempt = async () => {
+      try {
+        const res = await fetch(`/api/attempts/${attemptId}/info`);
+        if (!res.ok) {
+          if (res.status === 404) {
+            setError(t(locale, "no_attempt_found"));
+          } else {
+            setError(t(locale, "unable_load_exam"));
+          }
+          return;
+        }
+        
+        const data = await res.json();
+        setState(data.attempt);
+        setAnswers(data.attempt?.answers || {});
+        setVersion(data.attempt?.version || 1);
+        
+        // Load auto-save data if available
+        if (data.attempt?.auto_save_data && Object.keys(data.attempt.auto_save_data).length > 0) {
+          setAnswers(prev => ({ ...prev, ...data.attempt.auto_save_data }));
+        }
+
+        // Log exam start activity
+        logActivity('exam_started', {
+          examId: data.exam?.id,
+          examTitle: data.exam?.title,
+          questionCount: data.questions?.length || 0
+        });
+        
+      } catch (err) {
+        setError(t(locale, "unable_load_exam"));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAttempt();
+  }, [attemptId, locale]);
+
+  useEffect(() => {
+    if (!attemptId) return;
+    
     let cancelled = false;
     (async () => {
       try {
@@ -309,16 +351,37 @@ export default function AttemptPage() {
     if (!attemptId) return;
     
     try {
+      const deviceInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine,
+        screenWidth: screen.width,
+        screenHeight: screen.height,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        colorDepth: screen.colorDepth,
+        pixelDepth: screen.pixelDepth,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        url: window.location.href
+      };
+
+      const eventData = {
+        events: [{
+          activity_type: activity,
+          details: { ...details, deviceInfo },
+          timestamp: new Date().toISOString(),
+          event_time: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          url: window.location.href
+        }]
+      };
+
       await fetch(`/api/attempts/${attemptId}/activity`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          activity_type: activity,
-          details: details || {},
-          timestamp: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-          url: window.location.href
-        })
+        body: JSON.stringify(eventData)
       });
     } catch (error) {
       console.warn('Failed to log activity:', error);
