@@ -14,12 +14,14 @@ export default function ExamQuestion({
   onChange,
   disabled,
   onSave,
+  attemptId,
 }: {
   q: Question;
   value: AnswerValue;
   onChange: (val: AnswerValue) => void;
   disabled?: boolean;
   onSave?: () => void;
+  attemptId?: string | null;
 }) {
   const id = useId();
   const qType = q.question_type as QuestionType;
@@ -274,6 +276,73 @@ export default function ExamQuestion({
               <span>{translate(locale, 'be_detailed')}</span>
               <span>{translate(locale, 'characters_count', { count: v.length })}</span>
             </div>
+          </div>
+        );
+      }
+      case "photo_upload": {
+        const v = typeof value === "string" ? (value as string) : "";
+        const uploadingId = id + "-upload";
+        const onFilePicked = async (file: File | null) => {
+          if (!file) return;
+          try {
+            const fd = new FormData();
+            fd.append("image", file);
+            const res = await fetch(`/api/attempts/${attemptId ?? "unknown"}/upload`, { method: "POST", body: fd });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(j?.error || "Upload failed");
+            if (typeof j?.url === "string") {
+              handleChange(j.url);
+              onSave?.();
+            }
+          } catch (e) {
+            // best-effort, no toast on public page
+            // eslint-disable-next-line no-console
+            console.warn("Upload failed", e);
+          }
+        };
+        return (
+          <div className="space-y-3" aria-labelledby={legendId}>
+            {v ? (
+              <div className="space-y-2">
+                <img src={v} alt="Uploaded answer" className="max-h-64 rounded border" />
+                {!disabled && (
+                  <div className="flex items-center gap-2">
+                    <label className="btn btn-outline" htmlFor={uploadingId}>
+                      Replace Photo
+                      <input
+                        id={uploadingId}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => onFilePicked(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                    <button
+                      className="btn btn-destructive"
+                      type="button"
+                      onClick={() => handleChange(null)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <label className="btn btn-outline" htmlFor={uploadingId}>
+                  Upload Image
+                  <input
+                    id={uploadingId}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => onFilePicked(e.target.files?.[0] || null)}
+                    disabled={disabled}
+                  />
+                </label>
+                <p className="text-xs text-[var(--muted-foreground)] mt-2">Max 5MB. Accepted: JPEG, PNG, GIF, WebP, SVG.</p>
+              </div>
+            )}
           </div>
         );
       }

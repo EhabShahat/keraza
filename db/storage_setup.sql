@@ -53,3 +53,26 @@ CREATE POLICY "Anyone can update question-images" ON storage.objects
 
 CREATE POLICY "Anyone can delete question-images" ON storage.objects
   FOR DELETE USING (bucket_id = 'question-images');
+
+-- Create storage bucket for answer images (student uploads)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'answer-images',
+  'answer-images',
+  true,
+  5242880, -- 5MB limit
+  ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+) ON CONFLICT (id) DO NOTHING;
+
+-- TEMPORARY: permissive policies for development (restrict later if needed)
+CREATE POLICY "Public can view answer-images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'answer-images');
+
+CREATE POLICY "Anyone can upload answer-images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'answer-images');
+
+CREATE POLICY "Anyone can update answer-images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'answer-images');
+
+CREATE POLICY "Anyone can delete answer-images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'answer-images');

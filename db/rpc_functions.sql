@@ -532,7 +532,7 @@ AS $function$
 DECLARE
   v_old_score numeric;
   v_old_final numeric;
-  r record;
+  v_res record;
 BEGIN
   IF NOT public.is_admin() THEN RAISE EXCEPTION 'forbidden'; END IF;
 
@@ -541,18 +541,18 @@ BEGIN
   FROM public.exam_results er
   WHERE er.attempt_id = p_attempt_id;
 
-  RETURN QUERY
-  WITH res AS (
-    SELECT * FROM public.calculate_result_for_attempt(p_attempt_id)
-  )
+  SELECT * INTO v_res FROM public.calculate_result_for_attempt(p_attempt_id);
+
   INSERT INTO public.exam_results_history(
     attempt_id, old_score_percentage, new_score_percentage,
     old_final_score_percentage, new_final_score_percentage, meta, changed_at
   )
-  SELECT p_attempt_id, v_old_score, res.score_percentage,
-         v_old_final, res.final_score_percentage, '{}'::jsonb, now()
-  FROM res
-  RETURNING res.total_questions, res.correct_count, res.score_percentage, res.auto_points, res.manual_points, res.max_points, res.final_score_percentage;
+  VALUES (
+    p_attempt_id, v_old_score, v_res.score_percentage,
+    v_old_final, v_res.final_score_percentage, '{}'::jsonb, now()
+  );
+
+  RETURN QUERY SELECT v_res.total_questions, v_res.correct_count, v_res.score_percentage, v_res.auto_points, v_res.manual_points, v_res.max_points, v_res.final_score_percentage;
 END;
 $function$;
 

@@ -38,6 +38,7 @@ function isQuestionAnswered(question: Question, answer: AnswerValue): boolean {
       return Array.isArray(answer) && answer.length > 0;
     case "short_answer":
     case "paragraph":
+    case "photo_upload":
       return typeof answer === "string" && answer.trim() !== "";
     default:
       return false;
@@ -926,6 +927,7 @@ export default function AttemptPage() {
                     onChange={(v) => onAnswerChange(questions[currentIdx], v)}
                     onSave={saveNow}
                     disabled={disabled}
+                    attemptId={attemptId}
                   />
                 </div>
               )}
@@ -1026,6 +1028,7 @@ export default function AttemptPage() {
                       onChange={(v) => onAnswerChange(q, v)}
                       onSave={saveNow}
                       disabled={disabled}
+                      attemptId={attemptId}
                     />
                   </div>
                 ))}

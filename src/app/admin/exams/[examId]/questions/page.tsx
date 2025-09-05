@@ -23,7 +23,7 @@ interface QuestionRow {
   id: string;
   exam_id: string;
   question_text: string;
-  question_type: "true_false" | "single_choice" | "multiple_choice" | "multi_select" | "paragraph";
+  question_type: "true_false" | "single_choice" | "multiple_choice" | "multi_select" | "paragraph" | "photo_upload";
   options: string[] | null;
   correct_answers: unknown;
   required: boolean;
@@ -680,13 +680,15 @@ function QuestionForm({
           <option value="multiple_choice">Multiple Choice (radio buttons - multiple correct)</option>
           <option value="multi_select">Multi Select (checkboxes - multiple answers)</option>
           <option value="paragraph">Essay/Paragraph (text input)</option>
+          <option value="photo_upload">Photo Upload (student uploads an image)</option>
         </select>
         <div className="text-xs text-muted-foreground mt-1">
           {formData.question_type === "single_choice" && "Students can select only one option, and only one is correct."}
           {formData.question_type === "multiple_choice" && "Students can select only one option, but multiple options can be marked as correct."}
           {formData.question_type === "multi_select" && "Students can select multiple options using checkboxes."}
           {formData.question_type === "true_false" && "Simple true or false question."}
-          {formData.question_type === "paragraph" && "Open-ended text response question."}
+          {formData.question_type === "paragraph" && "Open-ended text response question (manually graded)."}
+          {formData.question_type === "photo_upload" && "Student will upload a single image as the answer (manually graded)."}
         </div>
       </div>
 
@@ -891,7 +893,8 @@ function QuestionForm({
         </div>
       )}
 
-      {/* Correct Answer */}
+      {/* Correct Answer (not applicable for paragraph or photo_upload) */}
+      {formData.question_type !== "paragraph" && formData.question_type !== "photo_upload" && (
       <div>
         <label className="label">Correct Answer (Optional)</label>
         {formData.question_type === "true_false" ? (
@@ -952,6 +955,7 @@ function QuestionForm({
           />
         )}
       </div>
+      )}
 
       {/* Settings */}
       <div className="grid grid-cols-2 gap-4">
