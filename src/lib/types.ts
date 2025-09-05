@@ -15,6 +15,9 @@ export interface Question {
   points: number;
   required: boolean;
   order_index: number | null;
+  // Optional image support
+  question_image_url?: string | null;
+  option_image_urls?: string[] | null;
 }
 
 export interface ExamInfo {

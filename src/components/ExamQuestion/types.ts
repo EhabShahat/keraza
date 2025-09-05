@@ -44,6 +44,7 @@ export interface SingleChoiceInputProps {
   required?: boolean;
   id: string;
   legendId: string;
+  optionImageUrls?: string[] | null;
 }
 
 export interface MultiSelectInputProps {
@@ -54,6 +55,7 @@ export interface MultiSelectInputProps {
   required?: boolean;
   id: string;
   legendId: string;
+  optionImageUrls?: string[] | null;
 }
 
 export interface ParagraphInputProps {

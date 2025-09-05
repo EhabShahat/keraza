@@ -8,7 +8,8 @@ export default function MultiSelectInput({
   disabled,
   required,
   id,
-  legendId
+  legendId,
+  optionImageUrls
 }: MultiSelectInputProps) {
   return (
     <div className="space-y-3" role="group" aria-labelledby={legendId}>
@@ -18,6 +19,7 @@ export default function MultiSelectInput({
       {options.map((opt, idx) => {
         const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D...
         const isSelected = value.includes(opt);
+        const imgUrl = optionImageUrls?.[idx] || null;
         return (
           <label key={idx} className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-all ${
             isSelected ? 'border-blue-500 bg-blue-50' : 'border-[var(--border)] hover:border-[var(--ring)] hover:bg-[var(--muted)]/50'
@@ -38,12 +40,22 @@ export default function MultiSelectInput({
               }`}>
                 {optionLetter}
               </div>
-              <span 
-                className={`flex-1 leading-relaxed select-none ${hasArabic(opt) ? 'arabic-text' : ''}`}
-                dir={hasArabic(opt) ? 'rtl' : 'ltr'}
-              >
-                {opt}
-              </span>
+              <div className="flex-1 space-y-2">
+                {imgUrl && (
+                  <img
+                    src={imgUrl}
+                    alt={`Option ${optionLetter}`}
+                    className="max-h-40 w-auto object-contain rounded border"
+                    draggable={false}
+                  />
+                )}
+                <span 
+                  className={`flex-1 leading-relaxed select-none ${hasArabic(opt) ? 'arabic-text' : ''}`}
+                  dir={hasArabic(opt) ? 'rtl' : 'ltr'}
+                >
+                  {opt}
+                </span>
+              </div>
             </div>
           </label>
         );

@@ -52,6 +52,18 @@ export default function QuestionHeader({
         </div>
       </div>
       
+      {/* Question image (optional) */}
+      {q.question_image_url && (
+        <div className="mt-2">
+          <img
+            src={q.question_image_url}
+            alt="Question"
+            className="max-h-64 rounded border"
+            draggable={false}
+          />
+        </div>
+      )}
+
       {q.points && (
         <p className="text-sm text-[var(--muted-foreground)] select-none">
           Points: {q.points}

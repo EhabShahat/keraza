@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import { useStudentLocale } from "@/components/public/PublicLocaleProvider";
 import { t } from "@/i18n/student";
+import type { CodeFormatSettings } from "@/lib/codeGenerator";
 
 interface AppSettings {
   brand_name?: string;
@@ -35,6 +36,8 @@ export default function ThankYouPage() {
   const [hasRemainingExams, setHasRemainingExams] = useState(false);
   const [remainingChecked, setRemainingChecked] = useState(false);
   const [studentCode, setStudentCode] = useState<string | null>(null);
+  const [codeSettings, setCodeSettings] = useState<CodeFormatSettings | null>(null);
+  const [isMultiExamMode, setIsMultiExamMode] = useState<boolean>(true);
 
   function formatDateInCairo(loc: string, iso: string) {
     try {
@@ -70,6 +73,74 @@ export default function ThankYouPage() {
     setAttemptId(id);
   }, [routeParams]);
 
+  // Fetch code format settings on mount
+  useEffect(() => {
+    async function fetchCodeSettings() {
+      try {
+        const res = await fetch("/api/public/code-settings", { cache: "no-store" });
+        if (res.ok) {
+          const settings = await res.json();
+          setCodeSettings(settings);
+          setIsMultiExamMode(settings.enable_multi_exam ?? true);
+        }
+      } catch (error) {
+        console.warn("Failed to fetch code settings, using defaults");
+        setCodeSettings({
+          code_length: 4,
+          code_format: "numeric",
+          code_pattern: null,
+          enable_multi_exam: true,
+        });
+        setIsMultiExamMode(true);
+      }
+    }
+    void fetchCodeSettings();
+  }, []);
+
+  // Helper function to validate code format
+  const isValidCode = (code: string): boolean => {
+    if (!codeSettings || !code) return false;
+    
+    const { code_length, code_format, code_pattern } = codeSettings;
+
+    if (code_format === "custom" && code_pattern) {
+      if (code.length !== code_pattern.length) return false;
+      
+      for (let i = 0; i < code_pattern.length; i++) {
+        const patternChar = code_pattern[i];
+        const codeChar = code[i];
+
+        switch (patternChar) {
+          case "N":
+            if (!/\d/.test(codeChar)) return false;
+            break;
+          case "A":
+            if (!/[A-Z]/i.test(codeChar)) return false;
+            break;
+          case "#":
+            if (!/[A-Z0-9]/i.test(codeChar)) return false;
+            break;
+          default:
+            if (codeChar !== patternChar) return false;
+        }
+      }
+      return true;
+    }
+
+    if (code.length !== code_length) return false;
+
+    switch (code_format) {
+      case "numeric":
+        return /^\d+$/.test(code);
+      case "alphabetic":
+        return /^[A-Z]+$/i.test(code);
+      case "alphanumeric":
+        return /^[A-Z0-9]+$/i.test(code);
+      default:
+        return /^\d+$/.test(code);
+    }
+  };
+
   // Fetch app settings and attempt info
   useEffect(() => {
     if (!attemptId) return;
@@ -100,8 +171,14 @@ export default function ThankYouPage() {
 
   // Check remaining exams using the student's code
   useEffect(() => {
+    // Only relevant in multi-exam mode
+    if (!isMultiExamMode) return;
+
     const code = attemptInfo?.student_code?.trim();
-    if (!code || !/^\d{4}$/.test(code)) return;
+    // Wait until we have both a code and code settings (to validate)
+    if (!code || !codeSettings) return;
+    if (!isValidCode(code)) return;
+
     setStudentCode(code);
     let cancelled = false;
 
@@ -130,7 +207,7 @@ export default function ThankYouPage() {
     }
     checkRemaining(code);
     return () => { cancelled = true; };
-  }, [attemptInfo?.student_code]);
+  }, [attemptInfo?.student_code, codeSettings, isMultiExamMode]);
 
   // Auto-redirect when more exams are available
   useEffect(() => {

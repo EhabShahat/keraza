@@ -28,6 +28,9 @@ interface QuestionRow {
   required: boolean;
   points: number;
   order_index: number | null;
+  // Image support
+  question_image_url?: string | null;
+  option_image_urls?: string[] | null;
 }
 
 export default function AdminQuestionsPage({ params }: { params: Promise<{ examId: string }> }) {
@@ -316,6 +319,18 @@ function QuestionCard({
             </div>
           </div>
 
+          {/* Question image preview */}
+          {question.question_image_url && (
+            <div className="mt-2">
+              <img
+                src={question.question_image_url}
+                alt="Question image"
+                className="max-h-48 rounded border"
+                draggable={false}
+              />
+            </div>
+          )}
+
           {/* Options Preview */}
           {(question.options?.length ?? 0) > 0 && (
             <div className="mb-3">
@@ -545,6 +560,8 @@ function EditQuestionModal({
     correct_answers: question.correct_answers,
     required: question.required,
     points: question.points,
+    question_image_url: question.question_image_url || null,
+    option_image_urls: question.option_image_urls || [],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -603,6 +620,9 @@ function QuestionForm({
   const addOption = () => {
     const options = formData.options || [];
     updateField('options', [...options, '']);
+    // keep option images aligned
+    const imgs = (formData.option_image_urls || []) as (string | null)[];
+    updateField('option_image_urls', [...imgs, null]);
   };
 
   const updateOption = (index: number, value: string) => {
@@ -615,9 +635,32 @@ function QuestionForm({
     const options = [...(formData.options || [])];
     options.splice(index, 1);
     updateField('options', options);
+    // remove corresponding image
+    const imgs = [...((formData.option_image_urls || []) as (string | null)[])];
+    if (imgs.length > index) {
+      imgs.splice(index, 1);
+      updateField('option_image_urls', imgs);
+    }
   };
 
   const needsOptions = ['single_choice', 'multiple_choice', 'multi_select'].includes(formData.question_type || '');
+
+  // Helpers: upload to question-images bucket
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+  const [uploadingQuestionImage, setUploadingQuestionImage] = useState(false);
+
+  async function uploadImage(file: File): Promise<string> {
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch('/api/admin/upload/question-image', {
+      method: 'POST',
+      body: fd,
+      credentials: 'include',
+    });
+    const j = await res.json();
+    if (!res.ok) throw new Error(j?.error || 'Upload failed');
+    return j.url as string;
+  }
 
   return (
     <div className="space-y-6">
@@ -664,6 +707,69 @@ function QuestionForm({
         )}
       </div>
 
+      {/* Question Image */}
+      <div>
+        <label className="label">Question Image (optional)</label>
+        {formData.question_image_url ? (
+          <div className="flex items-start gap-3">
+            <img src={formData.question_image_url} alt="Question" className="max-h-40 rounded border" />
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={uploadingQuestionImage}
+                onClick={() => updateField('question_image_url', null)}
+              >
+                Remove Image
+              </button>
+              <label className="btn btn-secondary">
+                {uploadingQuestionImage ? 'Uploading...' : 'Replace Image'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    try {
+                      setUploadingQuestionImage(true);
+                      const url = await uploadImage(f);
+                      updateField('question_image_url', url);
+                    } catch (err: any) {
+                      console.error(err);
+                    } finally {
+                      setUploadingQuestionImage(false);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        ) : (
+          <label className="btn btn-outline inline-flex items-center gap-2">
+            {uploadingQuestionImage ? 'Uploading...' : 'Upload Image'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                try {
+                  setUploadingQuestionImage(true);
+                  const url = await uploadImage(f);
+                  updateField('question_image_url', url);
+                } catch (err: any) {
+                  console.error(err);
+                } finally {
+                  setUploadingQuestionImage(false);
+                }
+              }}
+            />
+          </label>
+        )}
+      </div>
+
       {/* Options (for choice questions) */}
       {needsOptions && (
         <div>
@@ -679,16 +785,90 @@ function QuestionForm({
           </div>
           <div className="space-y-3">
             {(formData.options || []).map((option, index) => (
-              <div key={index} className="flex gap-3">
+              <div key={index} className="flex gap-3 items-start">
                 <div className="flex-shrink-0 w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-sm font-medium">
                   {String.fromCharCode(65 + index)}
                 </div>
-                <input
-                  className="input flex-1"
-                  placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                  value={option}
-                  onChange={(e) => updateOption(index, e.target.value)}
-                />
+                <div className="flex-1 space-y-2">
+                  <input
+                    className="input w-full"
+                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                    value={option}
+                    onChange={(e) => updateOption(index, e.target.value)}
+                  />
+                  {/* Option image controls */}
+                  <div className="flex items-center gap-3">
+                    {(formData.option_image_urls?.[index] ?? null) ? (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={formData.option_image_urls?.[index] as string}
+                          alt={`Option ${String.fromCharCode(65 + index)} image`}
+                          className="h-16 w-auto rounded border"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline"
+                          onClick={() => {
+                            const imgs = [...((formData.option_image_urls || []) as (string | null)[])];
+                            imgs[index] = null;
+                            updateField('option_image_urls', imgs);
+                          }}
+                        >
+                          Remove
+                        </button>
+                        <label className="btn btn-sm">
+                          {uploadingIdx === index ? 'Uploading...' : 'Replace'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const f = e.target.files?.[0];
+                              if (!f) return;
+                              try {
+                                setUploadingIdx(index);
+                                const url = await uploadImage(f);
+                                const imgs = [...((formData.option_image_urls || []) as (string | null)[])];
+                                imgs[index] = url;
+                                updateField('option_image_urls', imgs);
+                              } catch (err: any) {
+                                console.error(err);
+                              } finally {
+                                setUploadingIdx(null);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    ) : (
+                      <label className="btn btn-sm btn-outline">
+                        {uploadingIdx === index ? 'Uploading...' : 'Upload Image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            try {
+                              setUploadingIdx(index);
+                              const url = await uploadImage(f);
+                              const imgs = [...((formData.option_image_urls || []) as (string | null)[])];
+                              // ensure array length matches
+                              while (imgs.length < (formData.options?.length || 0)) imgs.push(null);
+                              imgs[index] = url;
+                              updateField('option_image_urls', imgs);
+                            } catch (err: any) {
+                              console.error(err);
+                            } finally {
+                              setUploadingIdx(null);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
                 <button
                   type="button"
                   onClick={() => removeOption(index)}

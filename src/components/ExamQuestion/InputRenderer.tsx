@@ -39,6 +39,7 @@ export default function InputRenderer({
           required={q.required}
           id={legendId}
           legendId={legendId}
+          optionImageUrls={q.option_image_urls || null}
         />
       );
     }
@@ -55,6 +56,7 @@ export default function InputRenderer({
           required={q.required}
           id={legendId}
           legendId={legendId}
+          optionImageUrls={q.option_image_urls || null}
         />
       );
     }

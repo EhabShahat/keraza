@@ -32,6 +32,22 @@ create table if not exists public.questions (
   created_at timestamptz not null default now()
 );
 
+-- Add optional image fields to questions (idempotent)
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'questions' and column_name = 'question_image_url'
+  ) then
+    alter table public.questions add column question_image_url text null;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'questions' and column_name = 'option_image_urls'
+  ) then
+    alter table public.questions add column option_image_urls jsonb null;
+  end if;
+end $$;
+
 -- legacy exam_codes table removed after migration to global students
 
 create table if not exists public.exam_attempts (

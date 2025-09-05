@@ -30,3 +30,26 @@ CREATE POLICY "Anyone can delete logos" ON storage.objects
 -- Grant necessary permissions
 GRANT ALL ON storage.objects TO authenticated;
 GRANT SELECT ON storage.objects TO anon;
+
+-- Create storage bucket for question/option images
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'question-images',
+  'question-images',
+  true,
+  5242880, -- 5MB limit
+  ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+) ON CONFLICT (id) DO NOTHING;
+
+-- TEMPORARY: permissive policies for development (restrict later to admins)
+CREATE POLICY "Public can view question-images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'question-images');
+
+CREATE POLICY "Anyone can upload question-images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'question-images');
+
+CREATE POLICY "Anyone can update question-images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'question-images');
+
+CREATE POLICY "Anyone can delete question-images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'question-images');

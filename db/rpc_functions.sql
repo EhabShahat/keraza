@@ -123,7 +123,9 @@ BEGIN
         'options', q.options,
         'points', q.points,
         'required', q.required,
-        'order_index', q.order_index
+        'order_index', q.order_index,
+        'question_image_url', q.question_image_url,
+        'option_image_urls', q.option_image_urls
       ) order by q.order_index nulls last, q.created_at), '[]'::jsonb)
       from public.questions q where q.exam_id = v_row.exam_id
     )
