@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Link from "next/link";
 import { authFetch } from "@/lib/authFetch";
 import { useParams } from "next/navigation";
@@ -19,6 +20,72 @@ export default function AdminAttemptDetails() {
       return j;
     },
   });
+
+  // Manual grading UI state
+  const [savingManual, setSavingManual] = useState(false);
+  const [regrading, setRegrading] = useState(false);
+  const [manualEdits, setManualEdits] = useState<Record<string, { awarded_points: string; notes: string }>>({});
+  const hasManualSections = !!(stateQ.data && Array.isArray((stateQ.data as any).questions));
+  const ungradedQuestions = ((): any[] => {
+    const qs = Array.isArray((stateQ.data as any)?.questions) ? (stateQ.data as any).questions : [];
+    return qs.filter((q: any) => q?.question_type === 'paragraph' || q?.question_type === 'photo_upload');
+  })();
+  const manualMap: Record<string, { awarded_points?: number; notes?: string; graded_at?: string }> = (stateQ.data as any)?.manual_grades_map || {};
+
+  function setEdit(qid: string, patch: Partial<{ awarded_points: string; notes: string }>) {
+    setManualEdits((prev: Record<string, { awarded_points: string; notes: string }>) => ({
+      ...prev,
+      [qid]: { awarded_points: prev[qid]?.awarded_points ?? '', notes: prev[qid]?.notes ?? '', ...patch }
+    }));
+  }
+
+  async function saveManualGrades() {
+    if (!attemptId) return;
+    const entries = Object.entries(manualEdits) as Array<[string, { awarded_points: string; notes: string }]>;
+    const payload = entries
+      .map(([question_id, v]) => ({
+        question_id,
+        awarded_points: Number(v.awarded_points),
+        notes: v.notes?.trim() ? v.notes : null,
+      }))
+      .filter((r) => Number.isFinite(r.awarded_points));
+    if (payload.length === 0) return;
+    setSavingManual(true);
+    try {
+      const res = await fetch(`/api/admin/attempts/${attemptId}/manual-grades`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grades: payload }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error || 'Save failed');
+      setManualEdits({});
+      stateQ.refetch();
+      metaQ.refetch();
+    } catch (e) {
+      console.error(e);
+      alert((e as any)?.message || 'Save failed');
+    } finally {
+      setSavingManual(false);
+    }
+  }
+
+  async function regradeThisAttempt() {
+    if (!attemptId) return;
+    setRegrading(true);
+    try {
+      const res = await fetch(`/api/admin/attempts/${attemptId}/regrade`, { method: 'POST' });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error || 'Regrade failed');
+      stateQ.refetch();
+      metaQ.refetch();
+    } catch (e) {
+      console.error(e);
+      alert((e as any)?.message || 'Regrade failed');
+    } finally {
+      setRegrading(false);
+    }
+  }
 
   const metaQ = useQuery({
     queryKey: ["admin", "attempt", attemptId, "meta"],
@@ -141,6 +208,67 @@ export default function AdminAttemptDetails() {
               </summary>
               <div className="mt-3">
                 <PerQuestionTable state={stateQ.data} />
+              </div>
+            </details>
+          )}
+          {hasManualSections && ungradedQuestions.length > 0 && (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                Manual grading (paragraph / photo)
+              </summary>
+              <div className="mt-3 space-y-3">
+                {ungradedQuestions.map((q: any) => {
+                  const maxPts = Number.isFinite(Number(q.points)) ? Number(q.points) : 1;
+                  const current = manualMap[q.id] || {};
+                  const edit = manualEdits[q.id] || { awarded_points: String(current.awarded_points ?? ''), notes: current.notes ?? '' };
+                  return (
+                    <div key={q.id} className="border rounded p-2">
+                      <div className="text-sm font-medium">{stripHtml(String(q.question_text || ''))}</div>
+                      <div className="text-xs text-gray-500 mt-1">Question ID: {q.id} · Max points: {maxPts}</div>
+                      <div className="mt-2 flex flex-col md:flex-row gap-2">
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm">Awarded</label>
+                          <input
+                            type="number"
+                            min={0}
+                            max={maxPts}
+                            step={0.5}
+                            value={edit.awarded_points}
+                            onChange={(e) => setEdit(q.id, { awarded_points: e.target.value })}
+                            className="px-2 py-1 border rounded w-28"
+                          />
+                          <span className="text-sm text-gray-600">/ {maxPts}</span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Notes (optional)"
+                          value={edit.notes}
+                          onChange={(e) => setEdit(q.id, { notes: e.target.value })}
+                          className="flex-1 px-2 py-1 border rounded"
+                        />
+                      </div>
+                      {current.graded_at && (
+                        <div className="text-xs text-gray-500 mt-1">Last graded: {new Date(current.graded_at).toLocaleString()}</div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveManualGrades}
+                    disabled={savingManual}
+                    className="px-3 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
+                  >
+                    {savingManual ? 'Saving…' : 'Save Manual Grades'}
+                  </button>
+                  <button
+                    onClick={regradeThisAttempt}
+                    disabled={regrading}
+                    className="px-3 py-2 rounded border"
+                  >
+                    {regrading ? 'Regrading…' : 'Regrade This Attempt'}
+                  </button>
+                </div>
               </div>
             </details>
           )}

@@ -5,7 +5,7 @@
 -- Ensure pgcrypto for gen_random_uuid/gen_random_bytes
 create extension if not exists pgcrypto;
 
-<<<<<<< HEAD
+-- resolved merge marker
 -- Ensure exam_attempts has device_info column (idempotent)
 alter table if exists public.exam_attempts add column if not exists device_info jsonb;
 
@@ -51,9 +51,6 @@ END;
 $function$;
 
 GRANT EXECUTE ON FUNCTION public.log_attempt_activity(uuid, jsonb) TO service_role;
-
-=======
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
 -- Execute arbitrary SQL passed from the server (service role only)
 -- Splits by semicolons and executes each non-empty, non-comment statement.
 CREATE OR REPLACE FUNCTION public.exec_sql(sql text)
@@ -77,6 +74,111 @@ END;
 $function$;
 
 GRANT EXECUTE ON FUNCTION public.exec_sql(text) TO service_role;
+
+-- Calculate/refresh results for a specific attempt (points-based with manual grades)
+CREATE OR REPLACE FUNCTION public.calculate_result_for_attempt(p_attempt_id uuid)
+RETURNS TABLE(
+  total_questions integer,
+  correct_count integer,
+  score_percentage numeric,
+  auto_points numeric,
+  manual_points numeric,
+  max_points numeric,
+  final_score_percentage numeric
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO public, extensions
+AS $function$
+DECLARE
+  v_row public.exam_attempts%rowtype;
+  v_total int;
+  v_correct int;
+  v_score numeric;
+  v_auto_points numeric;
+  v_manual_points numeric;
+  v_max_points numeric;
+  v_final numeric;
+BEGIN
+  SELECT * INTO v_row FROM public.exam_attempts WHERE id = p_attempt_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'attempt_not_found'; END IF;
+
+  WITH q AS (
+    SELECT q.id, q.question_type, q.correct_answers, COALESCE(q.points, 1) AS points
+    FROM public.questions q
+    WHERE q.exam_id = v_row.exam_id
+  ),
+  ans AS (
+    SELECT q.id, q.question_type, q.correct_answers, q.points,
+           (v_row.answers -> (q.id::text)) AS student_json
+    FROM q
+  ),
+  norm AS (
+    SELECT a.id, a.question_type, a.correct_answers, a.student_json, a.points,
+           CASE WHEN a.question_type IN ('multiple_choice','multi_select') THEN
+             COALESCE((SELECT ARRAY(SELECT jsonb_array_elements_text(a.student_json) ORDER BY 1)), ARRAY[]::text[])
+           ELSE NULL END AS s_arr,
+           CASE WHEN a.question_type IN ('multiple_choice','multi_select') THEN
+             COALESCE((SELECT ARRAY(SELECT jsonb_array_elements_text(a.correct_answers) ORDER BY 1)), ARRAY[]::text[])
+           ELSE NULL END AS c_arr
+    FROM ans a
+  ),
+  graded AS (
+    SELECT n.id, n.question_type, n.points,
+           CASE
+             WHEN n.question_type IN ('paragraph','photo_upload') THEN NULL
+             WHEN n.question_type IN ('true_false','single_choice') THEN
+               CASE
+                 WHEN n.student_json IS NULL THEN FALSE
+                 WHEN jsonb_typeof(n.correct_answers) = 'array' AND jsonb_array_length(n.correct_answers) = 1 THEN
+                   (n.student_json::text = (n.correct_answers->0)::text)
+                 ELSE n.student_json::text = n.correct_answers::text
+               END
+             WHEN n.question_type IN ('multiple_choice','multi_select') THEN
+               COALESCE(n.s_arr, ARRAY[]::text[]) = COALESCE(n.c_arr, ARRAY[]::text[])
+             ELSE FALSE
+           END AS is_correct
+    FROM norm n
+  )
+  SELECT
+    COUNT(*) FILTER (WHERE question_type NOT IN ('paragraph','photo_upload')) AS total_q,
+    COUNT(*) FILTER (WHERE is_correct IS TRUE) AS correct_cnt,
+    SUM(points) AS all_points,
+    SUM(CASE WHEN is_correct IS TRUE THEN points ELSE 0 END) AS auto_pts
+  INTO v_total, v_correct, v_max_points, v_auto_points
+  FROM graded;
+
+  v_score := CASE WHEN v_total > 0 THEN ROUND((v_correct::numeric * 100.0) / v_total, 2) ELSE 0 END;
+
+  SELECT COALESCE(SUM(LEAST(mg.awarded_points, COALESCE(q.points, 1))), 0)
+  INTO v_manual_points
+  FROM public.manual_grades mg
+  JOIN public.questions q ON q.id = mg.question_id
+  WHERE mg.attempt_id = p_attempt_id AND q.exam_id = v_row.exam_id;
+
+  v_final := CASE WHEN COALESCE(v_max_points,0) > 0 THEN ROUND(((COALESCE(v_auto_points,0) + COALESCE(v_manual_points,0)) / v_max_points) * 100.0, 2) ELSE 0 END;
+
+  INSERT INTO public.exam_results(
+    attempt_id, total_questions, correct_count, score_percentage,
+    auto_points, manual_points, max_points, final_score_percentage, calculated_at
+  )
+  VALUES (
+    p_attempt_id, v_total, v_correct, v_score,
+    COALESCE(v_auto_points,0), COALESCE(v_manual_points,0), COALESCE(v_max_points,0), v_final, now()
+  )
+  ON CONFLICT (attempt_id) DO UPDATE SET
+    total_questions = EXCLUDED.total_questions,
+    correct_count = EXCLUDED.correct_count,
+    score_percentage = EXCLUDED.score_percentage,
+    auto_points = EXCLUDED.auto_points,
+    manual_points = EXCLUDED.manual_points,
+    max_points = EXCLUDED.max_points,
+    final_score_percentage = EXCLUDED.final_score_percentage,
+    calculated_at = now();
+
+  RETURN QUERY SELECT v_total, v_correct, v_score, COALESCE(v_auto_points,0), COALESCE(v_manual_points,0), COALESCE(v_max_points,0), v_final;
+END;
+$function$;
 
 -- get_attempt_state(uuid) -> jsonb
 CREATE OR REPLACE FUNCTION public.get_attempt_state(p_attempt_id uuid)
@@ -299,73 +401,29 @@ CREATE OR REPLACE FUNCTION public.submit_attempt(p_attempt_id uuid)
 AS $function$
 DECLARE
   v_row public.exam_attempts%rowtype;
-  v_total int;
-  v_correct int;
+  v_total integer;
+  v_correct integer;
   v_score numeric;
+  v_auto numeric;
+  v_manual numeric;
+  v_max numeric;
+  v_final numeric;
 BEGIN
-  select * into v_row from public.exam_attempts where id=p_attempt_id for update;
-  if not found then raise exception 'attempt_not_found'; end if;
-  if v_row.submitted_at is not null or v_row.completion_status='submitted' then raise exception 'attempt_already_submitted'; end if;
+  SELECT * INTO v_row FROM public.exam_attempts WHERE id = p_attempt_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'attempt_not_found'; END IF;
+  IF v_row.submitted_at IS NOT NULL OR v_row.completion_status = 'submitted' THEN RAISE EXCEPTION 'attempt_already_submitted'; END IF;
 
-  with ans as (
-    select q.id,
-           q.question_type,
-           q.correct_answers,
-           (v_row.answers -> (q.id::text)) as student_json
-    from public.questions q
-    where q.exam_id = v_row.exam_id
-  ),
-  norm as (
-    select a.id,
-           a.question_type,
-           a.correct_answers,
-           a.student_json,
-           case when a.question_type in ('multiple_choice','multi_select') then
-             coalesce((select array(select jsonb_array_elements_text(a.student_json) order by 1)), array[]::text[])
-           else null end as s_arr,
-           case when a.question_type in ('multiple_choice','multi_select') then
-             coalesce((select array(select jsonb_array_elements_text(a.correct_answers) order by 1)), array[]::text[])
-           else null end as c_arr
-    from ans a
-  ),
-  graded as (
-    select n.id,
-           n.question_type,
-           case
-             when n.question_type = 'paragraph' then null
-             when n.question_type in ('true_false','single_choice') then
-               case
-                 when n.student_json is null then false
-                 when jsonb_typeof(n.correct_answers) = 'array' and jsonb_array_length(n.correct_answers)=1 then
-                   (n.student_json::text = (n.correct_answers->0)::text)
-                 else n.student_json::text = n.correct_answers::text
-               end
-             when n.question_type in ('multiple_choice','multi_select') then
-               coalesce(n.s_arr, array[]::text[]) = coalesce(n.c_arr, array[]::text[])
-             else false
-           end as is_correct
-    from norm n
-  )
-  select count(*) filter (where question_type <> 'paragraph') as total_q,
-         count(*) filter (where is_correct is true) as correct_cnt
-  into v_total, v_correct
-  from graded;
+  SELECT * INTO v_total, v_correct, v_score, v_auto, v_manual, v_max, v_final
+  FROM public.calculate_result_for_attempt(p_attempt_id);
 
-  v_score := case when v_total > 0 then round((v_correct::numeric * 100.0) / v_total, 2) else 0 end;
+  UPDATE public.exam_attempts
+    SET submitted_at = now(), completion_status = 'submitted', updated_at = now()
+    WHERE id = p_attempt_id;
 
-  insert into public.exam_results(attempt_id, total_questions, correct_count, score_percentage)
-  values (p_attempt_id, v_total, v_correct, v_score)
-  on conflict (attempt_id) do update set total_questions=excluded.total_questions, correct_count=excluded.correct_count, score_percentage=excluded.score_percentage, calculated_at=now();
-
-  update public.exam_attempts
-    set submitted_at = now(), completion_status='submitted', updated_at=now()
-  where id = p_attempt_id;
-
-  return query select v_total, v_correct, v_score;
+  RETURN QUERY SELECT v_total, v_correct, v_score;
 END;
 $function$;
 
-<<<<<<< HEAD
 -- cleanup_expired_attempts() -> auto-submit expired in-progress attempts
 CREATE OR REPLACE FUNCTION public.cleanup_expired_attempts()
  RETURNS TABLE(auto_submitted_count integer)
@@ -408,9 +466,6 @@ BEGIN
 END;
 $function$;
 
-=======
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
--- admin_list_attempts(uuid) -> attempts list for Admin UI
 CREATE OR REPLACE FUNCTION public.admin_list_attempts(p_exam_id uuid)
 RETURNS TABLE (
   id uuid,
@@ -420,7 +475,8 @@ RETURNS TABLE (
   completion_status text,
   ip_address inet,
   student_name text,
-  score_percentage numeric
+  score_percentage numeric,
+  final_score_percentage numeric
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -439,7 +495,8 @@ BEGIN
          a.completion_status,
          a.ip_address,
          coalesce(s.student_name, a.student_name) as student_name,
-         er.score_percentage
+         er.score_percentage,
+         er.final_score_percentage
   FROM public.exam_attempts a
   LEFT JOIN public.students s ON s.id = a.student_id
   LEFT JOIN public.exam_results er ON er.attempt_id = a.id
@@ -455,10 +512,75 @@ grant execute on function public.start_attempt(uuid, text, text, inet) to anon, 
 grant execute on function public.start_attempt_v2(uuid, text, text, inet) to anon, authenticated;
 grant execute on function public.submit_attempt(uuid) to anon, authenticated;
 grant execute on function public.admin_list_attempts(uuid) to service_role;
-<<<<<<< HEAD
 grant execute on function public.cleanup_expired_attempts() to service_role;
-=======
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
+
+-- Regrade a single attempt (admin only), returns recalculated values
+CREATE OR REPLACE FUNCTION public.regrade_attempt(p_attempt_id uuid)
+RETURNS TABLE(
+  total_questions integer,
+  correct_count integer,
+  score_percentage numeric,
+  auto_points numeric,
+  manual_points numeric,
+  max_points numeric,
+  final_score_percentage numeric
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO public, extensions
+AS $function$
+DECLARE
+  v_old_score numeric;
+  v_old_final numeric;
+  r record;
+BEGIN
+  IF NOT public.is_admin() THEN RAISE EXCEPTION 'forbidden'; END IF;
+
+  SELECT er.score_percentage, COALESCE(er.final_score_percentage, er.score_percentage)
+  INTO v_old_score, v_old_final
+  FROM public.exam_results er
+  WHERE er.attempt_id = p_attempt_id;
+
+  RETURN QUERY
+  WITH res AS (
+    SELECT * FROM public.calculate_result_for_attempt(p_attempt_id)
+  )
+  INSERT INTO public.exam_results_history(
+    attempt_id, old_score_percentage, new_score_percentage,
+    old_final_score_percentage, new_final_score_percentage, meta, changed_at
+  )
+  SELECT p_attempt_id, v_old_score, res.score_percentage,
+         v_old_final, res.final_score_percentage, '{}'::jsonb, now()
+  FROM res
+  RETURNING res.total_questions, res.correct_count, res.score_percentage, res.auto_points, res.manual_points, res.max_points, res.final_score_percentage;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.regrade_attempt(uuid) TO service_role;
+
+-- Regrade all attempts for an exam (admin only)
+CREATE OR REPLACE FUNCTION public.regrade_exam(p_exam_id uuid)
+RETURNS TABLE(regraded_count integer)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO public, extensions
+AS $function$
+DECLARE
+  v_count integer := 0;
+  v_id uuid;
+BEGIN
+  IF NOT public.is_admin() THEN RAISE EXCEPTION 'forbidden'; END IF;
+
+  FOR v_id IN SELECT id FROM public.exam_attempts WHERE exam_id = p_exam_id LOOP
+    PERFORM * FROM public.regrade_attempt(v_id);
+    v_count := v_count + 1;
+  END LOOP;
+
+  RETURN QUERY SELECT v_count;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.regrade_exam(uuid) TO service_role;
 
 -- Admin management RPCs
 -- Reset a student's attempts (admin only). This deletes rows from student_exam_attempts

@@ -4,7 +4,8 @@ export type QuestionType =
   | "multiple_choice"
   | "multi_select"
   | "short_answer"
-  | "paragraph";
+  | "paragraph"
+  | "photo_upload";
 
 export interface Question {
   id: string;

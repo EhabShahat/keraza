@@ -25,6 +25,7 @@ interface Attempt {
   started_at: string | null;
   submitted_at: string | null;
   score_percentage: number | null;
+  final_score_percentage?: number | null;
   ip_address: string | null;
 }
 
@@ -36,6 +37,7 @@ export default function AdminResultsIndex() {
   const [endDate, setEndDate] = useState("");
   const [exportingCsv, setExportingCsv] = useState(false);
   const [exportingXlsx, setExportingXlsx] = useState(false);
+  const [regradingAll, setRegradingAll] = useState(false);
   const [scoreSort, setScoreSort] = useState<"none" | "asc" | "desc">("none");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -147,6 +149,22 @@ export default function AdminResultsIndex() {
       toast.error({ title: "Export Failed", message: e?.message || "Unknown error" });
     } finally {
       setExportingCsv(false);
+    }
+  };
+
+  const handleRegradeAll = async () => {
+    if (!examId) return;
+    setRegradingAll(true);
+    try {
+      const res = await authFetch(`/api/admin/exams/${examId}/regrade`, { method: 'POST' });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error || 'Regrade failed');
+      toast.success({ title: 'Regrade started', message: `Regraded ${j?.result?.regraded_count ?? ''} attempts` });
+      attemptsQuery.refetch();
+    } catch (e: any) {
+      toast.error({ title: 'Regrade failed', message: e?.message || 'Unknown error' });
+    } finally {
+      setRegradingAll(false);
     }
   };
 
@@ -263,12 +281,13 @@ export default function AdminResultsIndex() {
       case "submitted":
         return attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleString() : "-";
       case "score":
-        return attempt.score_percentage !== null ? (
+        const scoreVal = (attempt.final_score_percentage ?? attempt.score_percentage);
+        return scoreVal !== null && scoreVal !== undefined ? (
           <span className={`font-bold ${
-            attempt.score_percentage >= 80 ? 'text-green-600' :
-            attempt.score_percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
+            (scoreVal as number) >= 80 ? 'text-green-600' :
+            (scoreVal as number) >= 60 ? 'text-yellow-600' : 'text-red-600'
           }`}>
-            {attempt.score_percentage}%
+            {scoreVal}%
           </span>
         ) : "-";
       case "ip":
@@ -357,6 +376,18 @@ export default function AdminResultsIndex() {
 
         {examId && (
           <div className="flex items-center gap-3 mt-4 pt-4 border-t">
+            <ActionButton
+              variant="secondary"
+              onClick={handleRegradeAll}
+              loading={regradingAll}
+              icon={
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19A9 9 0 0119 5" />
+                </svg>
+              }
+            >
+              Regrade All Attempts
+            </ActionButton>
             <Link href={`/admin/results/analysis/${examId}`}>
               <ActionButton
                 variant="secondary"

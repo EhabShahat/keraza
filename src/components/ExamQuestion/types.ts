@@ -8,6 +8,7 @@ export interface ExamQuestionProps {
   onChange: (val: AnswerValue) => void;
   disabled?: boolean;
   onSave?: () => void;
+  attemptId?: string;
 }
 
 export interface QuestionHeaderProps {
@@ -25,6 +26,7 @@ export interface InputRendererProps {
   onChange: (val: AnswerValue) => void;
   disabled?: boolean;
   legendId: string;
+  attemptId?: string;
 }
 
 export interface TrueFalseInputProps {
@@ -65,4 +67,14 @@ export interface ParagraphInputProps {
   required?: boolean;
   id: string;
   legendId: string;
+}
+
+export interface PhotoUploadInputProps {
+  value: string;
+  onChange: (val: string | null) => void;
+  disabled?: boolean;
+  required?: boolean;
+  id: string;
+  legendId: string;
+  attemptId?: string;
 }

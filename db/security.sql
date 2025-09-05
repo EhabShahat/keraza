@@ -64,9 +64,6 @@ BEGIN
   ) THEN
     EXECUTE 'DROP POLICY app_settings_admin_write ON public.app_settings';
   END IF;
-<<<<<<< HEAD
-  EXECUTE 'CREATE POLICY app_settings_admin_write ON public.app_settings FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
-=======
   -- Consolidate app_settings policies into a single admin-all policy
   IF EXISTS (
     SELECT 1 FROM pg_policies
@@ -262,7 +259,25 @@ DO $do$ BEGIN
   EXECUTE $$CREATE POLICY app_config_public_read_keys ON public.app_config
     FOR SELECT TO anon
     USING (key IN ('system_mode','system_disabled','system_disabled_message'))$$;
->>>>>>> 0602e4005d295e20267a4bdf4c63a7bc1636e05a
+END $do$;
+
+-- Enable RLS for new tables
+ALTER TABLE IF EXISTS public.manual_grades ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.exam_results_history ENABLE ROW LEVEL SECURITY;
+
+-- Admin ALL policies for new tables
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='manual_grades' AND policyname='manual_grades_admin_all') THEN
+    EXECUTE 'DROP POLICY manual_grades_admin_all ON public.manual_grades';
+  END IF;
+  EXECUTE 'CREATE POLICY manual_grades_admin_all ON public.manual_grades FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
+END $do$;
+
+DO $do$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exam_results_history' AND policyname='exam_results_history_admin_all') THEN
+    EXECUTE 'DROP POLICY exam_results_history_admin_all ON public.exam_results_history';
+  END IF;
+  EXECUTE 'CREATE POLICY exam_results_history_admin_all ON public.exam_results_history FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin())';
 END $do$;
 
 -- Set immutable search_path for all functions in public

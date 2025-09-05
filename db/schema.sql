@@ -72,6 +72,57 @@ create table if not exists public.exam_results (
   calculated_at timestamptz not null default now()
 );
 
+-- Extended scoring columns (idempotent)
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'exam_results' and column_name = 'auto_points'
+  ) then
+    alter table public.exam_results add column auto_points numeric not null default 0;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'exam_results' and column_name = 'manual_points'
+  ) then
+    alter table public.exam_results add column manual_points numeric not null default 0;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'exam_results' and column_name = 'max_points'
+  ) then
+    alter table public.exam_results add column max_points numeric not null default 0;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'exam_results' and column_name = 'final_score_percentage'
+  ) then
+    alter table public.exam_results add column final_score_percentage numeric not null default 0;
+  end if;
+end $$;
+
+-- Manual grades: per-attempt, per-question awarded points (idempotent)
+create table if not exists public.manual_grades (
+  attempt_id uuid not null references public.exam_attempts(id) on delete cascade,
+  question_id uuid not null references public.questions(id) on delete cascade,
+  awarded_points numeric not null default 0,
+  notes text null,
+  graded_by text null,
+  graded_at timestamptz not null default now(),
+  primary key (attempt_id, question_id)
+);
+
+-- Results history for audit (idempotent)
+create table if not exists public.exam_results_history (
+  id uuid primary key default gen_random_uuid(),
+  attempt_id uuid not null references public.exam_attempts(id) on delete cascade,
+  old_score_percentage numeric null,
+  new_score_percentage numeric null,
+  old_final_score_percentage numeric null,
+  new_final_score_percentage numeric null,
+  meta jsonb not null default '{}'::jsonb,
+  changed_at timestamptz not null default now()
+);
+
 create table if not exists public.exam_ips (
   id uuid primary key default gen_random_uuid(),
   exam_id uuid not null references public.exams(id) on delete cascade,

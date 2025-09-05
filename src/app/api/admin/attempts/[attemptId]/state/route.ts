@@ -52,7 +52,18 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ attemptId: 
           order_index: q.order_index,
           correct_answers: q.correct_answers,
         }));
-        const enriched = { ...(state ?? {}), questions: adminQuestions };
+        // Load manual grades for this attempt
+        const mg = await supabase
+          .from("manual_grades")
+          .select("question_id, awarded_points, notes, graded_at")
+          .eq("attempt_id", attemptId);
+        const manual = Array.isArray(mg.data) ? mg.data : [];
+        const manualMap = manual.reduce((acc: any, row: any) => {
+          acc[row.question_id] = { awarded_points: row.awarded_points, notes: row.notes, graded_at: row.graded_at };
+          return acc;
+        }, {} as Record<string, { awarded_points: number; notes?: string | null; graded_at?: string }>);
+
+        const enriched = { ...(state ?? {}), questions: adminQuestions, manual_grades: manual, manual_grades_map: manualMap } as any;
         return NextResponse.json(enriched);
       }
       if (qRes.error) {
