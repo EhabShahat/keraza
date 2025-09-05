@@ -340,7 +340,7 @@ export default function ExamQuestion({
                     disabled={disabled}
                   />
                 </label>
-                <p className="text-xs text-[var(--muted-foreground)] mt-2">Max 5MB. Accepted: JPEG, PNG, GIF, WebP, SVG.</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-2">Max 5MB. Accepted: JPEG, PNG, GIF, WebP.</p>
               </div>
             )}
           </div>

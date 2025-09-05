@@ -256,7 +256,8 @@ function QuestionCard({
       single_choice: "Single Choice",
       multiple_choice: "Multiple Choice", 
       multi_select: "Multi Select",
-      paragraph: "Essay/Paragraph"
+      paragraph: "Essay/Paragraph",
+      photo_upload: "Photo Upload",
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -267,7 +268,8 @@ function QuestionCard({
       single_choice: "bg-green-100 text-green-800 border-green-200",
       multiple_choice: "bg-purple-100 text-purple-800 border-purple-200",
       multi_select: "bg-orange-100 text-orange-800 border-orange-200",
-      paragraph: "bg-gray-100 text-gray-800 border-gray-200"
+      paragraph: "bg-gray-100 text-gray-800 border-gray-200",
+      photo_upload: "bg-pink-100 text-pink-800 border-pink-200",
     };
     return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
   };

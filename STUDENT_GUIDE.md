@@ -77,6 +77,12 @@
 - Character count is displayed
 - Be as detailed as possible
 
+#### Photo Upload
+- Upload a single image as your answer
+- Accepted types: JPEG, PNG, GIF, WebP (max 5 MB)
+- After upload, a thumbnail preview appears
+- You can replace or remove the image before submitting
+
 ## 💾 Saving Your Work
 
 ### Automatic Features

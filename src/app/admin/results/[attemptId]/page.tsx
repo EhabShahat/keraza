@@ -221,10 +221,43 @@ export default function AdminAttemptDetails() {
                   const maxPts = Number.isFinite(Number(q.points)) ? Number(q.points) : 1;
                   const current = manualMap[q.id] || {};
                   const edit = manualEdits[q.id] || { awarded_points: String(current.awarded_points ?? ''), notes: current.notes ?? '' };
+                  const ans = (stateQ.data as any)?.answers?.[q.id];
                   return (
                     <div key={q.id} className="border rounded p-2">
                       <div className="text-sm font-medium">{stripHtml(String(q.question_text || ''))}</div>
                       <div className="text-xs text-gray-500 mt-1">Question ID: {q.id} · Max points: {maxPts}</div>
+                      <div className="mt-2">
+                        <div className="text-xs text-gray-600 mb-1">Student Answer:</div>
+                        {(() => {
+                          if (q.question_type === 'photo_upload') {
+                            const url = typeof ans === 'string' ? ans : '';
+                            return url ? (
+                              <div className="flex items-start gap-3">
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="inline-block">
+                                  <img src={url} alt="Student uploaded image" className="max-h-40 rounded border" />
+                                </a>
+                                <div className="text-xs break-all">
+                                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Open full image</a>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500">No image uploaded.</div>
+                            );
+                          }
+                          if (q.question_type === 'paragraph') {
+                            const text = typeof ans === 'string' ? ans : '';
+                            return text ? (
+                              <div className="p-2 bg-gray-50 border rounded text-sm whitespace-pre-wrap">{text}</div>
+                            ) : (
+                              <div className="text-xs text-gray-500">No answer submitted.</div>
+                            );
+                          }
+                          // Fallback display for other types
+                          return (
+                            <div className="text-xs text-gray-500">{hasAnswer(q, ans) ? fmtAnswer(q, ans) : 'No answer submitted.'}</div>
+                          );
+                        })()}
+                      </div>
                       <div className="mt-2 flex flex-col md:flex-row gap-2">
                         <div className="flex items-center gap-2">
                           <label className="text-sm">Awarded</label>
@@ -556,7 +589,25 @@ function PerQuestionTable({ state }: { state: any }) {
                   <div className="text-xs text-gray-500">{q.id}</div>
                 </td>
                 <td className="p-2 border text-sm">{q.question_type}</td>
-                <td className="p-2 border text-sm whitespace-pre-wrap">{hasAns ? fmtAnswer(q, ans) : ""}</td>
+                <td className="p-2 border text-sm whitespace-pre-wrap">
+                  {(() => {
+                    if (!hasAns) return "";
+                    if (q.question_type === 'photo_upload' && typeof ans === 'string') {
+                      const url = ans as string;
+                      return (
+                        <div className="flex items-start gap-3">
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-block">
+                            <img src={url} alt="Answer image" className="max-h-24 rounded border" />
+                          </a>
+                          <div className="text-xs break-all">
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Open</a>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return fmtAnswer(q, ans);
+                  })()}
+                </td>
                 <td className="p-2 border text-sm">
                   {!hasAns
                     ? ""
@@ -575,7 +626,7 @@ function PerQuestionTable({ state }: { state: any }) {
   );
 }
 
-type QType = "true_false" | "single_choice" | "multiple_choice" | "multi_select" | "paragraph";
+type QType = "true_false" | "single_choice" | "multiple_choice" | "multi_select" | "paragraph" | "photo_upload";
 function isAutoGradable(t: QType) {
   return t === "true_false" || t === "single_choice" || t === "multiple_choice" || t === "multi_select";
 }
@@ -623,6 +674,7 @@ function hasAnswer(question: any, answer: unknown): boolean {
   if (t === "single_choice") return typeof answer === "string" && normStr(answer) !== "";
   if (t === "multiple_choice" || t === "multi_select") return Array.isArray(answer) && (answer as any[]).length > 0;
   if (t === "paragraph") return typeof answer === "string" && normStr(answer) !== "";
+  if (t === "photo_upload") return typeof answer === "string" && normStr(answer) !== "";
   return false;
 }
 function fmtAnswer(question: any, answer: unknown): string {
@@ -631,6 +683,7 @@ function fmtAnswer(question: any, answer: unknown): string {
   if (t === "single_choice") return normStr(answer);
   if (t === "multiple_choice" || t === "multi_select") return Array.isArray(answer) ? (answer as any[]).join(", ") : "";
   if (t === "paragraph") return typeof answer === "string" ? answer : String(answer ?? "");
+  if (t === "photo_upload") return typeof answer === "string" ? answer : String(answer ?? "");
   return String(answer ?? "");
 }
 function stripHtml(s: string) {

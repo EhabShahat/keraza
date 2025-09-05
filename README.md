@@ -9,6 +9,7 @@ A comprehensive, production-ready exam platform built with Next.js 15, React 19,
 - **📱 WhatsApp Integration**: Server capability to send codes via WhatsApp Cloud API with customizable templates
 - **📊 Real-time Monitoring**: Live activity tracking, attempt monitoring, and comprehensive audit logging
 - **📁 Multi-format Support**: CSV/XLSX import/export for questions, students, and results
+- **🖼️ Photo Upload Questions**: New `photo_upload` question type lets students upload an image as their answer (manually graded). Images are stored in Supabase Storage (`answer-images` bucket) and shown as thumbnails to graders.
 - **🔒 Security Features**: IP tracking, attempt validation, and comprehensive audit trails
 - **🌍 Internationalization**: Full Arabic and English support with RTL layout
 - **♿ Accessibility**: WCAG compliant with screen reader support and keyboard navigation
@@ -49,7 +50,23 @@ Run the database setup script to create tables and initial data:
 npm run setup:database
 ```
 
-### 4. Start Development Server
+### 4. Storage Buckets
+
+Run once to create and configure storage buckets for logos, question images, and student answer images:
+
+```bash
+npm run setup:storage
+```
+
+This sets up the following buckets with development policies:
+
+- `logos` — Admin-managed branding assets
+- `question-images` — Images associated with questions and options
+- `answer-images` — Student answer uploads for the `photo_upload` question type
+
+Note: Policies are permissive for development. Restrict access before production.
+
+### 5. Start Development Server
 
 ```bash
 npm run dev
@@ -78,7 +95,7 @@ npm run dev
 - **`/admin/exams/[examId]/questions`** — Question management with drag-and-drop reordering
 - **`/admin/exams/[examId]/students`** — Student management and code generation
 - **`/admin/students`** — Global student database management
-- **`/admin/results`** — Results analysis and export capabilities
+- **`/admin/results`** — Results analysis and export capabilities; manual grading for `paragraph` and `photo_upload` with inline image thumbnails
 - **`/admin/monitoring`** — Live activity monitoring and attempt tracking
 - **`/admin/audit`** — Comprehensive audit log viewer
 - **`/admin/settings`** — Global settings (branding, language, WhatsApp templates)

@@ -16,7 +16,6 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ attemp
       "image/png",
       "image/gif",
       "image/webp",
-      "image/svg+xml",
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ error: "invalid_type" }, { status: 400 });
@@ -25,6 +24,18 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ attemp
     if (file.size > maxSize) return NextResponse.json({ error: "file_too_large" }, { status: 400 });
 
     const svc = supabaseServer();
+
+    // Basic validation: attempt exists and is not submitted yet
+    const att = await svc
+      .from("exam_attempts")
+      .select("id, completion_status")
+      .eq("id", attemptId)
+      .maybeSingle();
+    if (att.error) return NextResponse.json({ error: att.error.message }, { status: 400 });
+    if (!att.data) return NextResponse.json({ error: "attempt_not_found" }, { status: 404 });
+    if (att.data.completion_status === "submitted") {
+      return NextResponse.json({ error: "attempt_submitted" }, { status: 400 });
+    }
     const ts = Date.now();
     const rand = Math.random().toString(36).slice(2, 8);
     const ext = (file.name.split(".").pop() || "png").toLowerCase();

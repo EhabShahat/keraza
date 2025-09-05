@@ -39,7 +39,8 @@
    - Multiple Select (multiple answers)
    - True/False
    - Short Answer
-   - Paragraph (long text)
+   - Paragraph (long text) — manually graded
+   - Photo Upload — new question type where students upload a single image as their answer (manually graded)
 3. **Bulk Import**: Upload CSV/XLSX files with questions
 4. **Reorder**: Drag and drop to change question order
 5. **Edit**: Modify existing questions and scoring
@@ -64,6 +65,8 @@
    - By date range
    - By completion status
 3. **Individual Results**: Click on any attempt for detailed view
+   - Manual grading view supports `paragraph` and `photo_upload` questions
+   - For `photo_upload`, student answers are displayed as inline thumbnails with a link to open the full image in a new tab
 
 ### Analytics Dashboard
 - **Question Analysis**: See which questions are most/least difficult
@@ -75,6 +78,12 @@
 - **CSV Export**: Raw data for further analysis
 - **XLSX Export**: Formatted spreadsheet
 - **PDF Reports**: Professional summary reports
+
+### Manual Grading Tips (Paragraph / Photo Upload)
+- Ensure the awarded points do not exceed the question's max points
+- For `photo_upload` answers, click the image thumbnail to open the full-resolution image in a new tab
+- Add notes to record grading rationale; notes are saved along with awarded points
+- After saving manual grades, click "Regrade This Attempt" if overall scores need immediate recalculation (usually automatic)
 
 ## 📱 WhatsApp Integration
 
