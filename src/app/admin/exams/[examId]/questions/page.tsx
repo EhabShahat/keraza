@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useEffect, useCallback, use } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { authFetch } from "@/lib/authFetch";
 import { useToast } from "@/components/ToastProvider";
 import {
@@ -30,7 +31,7 @@ interface QuestionRow {
   order_index: number | null;
   // Image support
   question_image_url?: string | null;
-  option_image_urls?: string[] | null;
+  option_image_urls?: (string | null)[] | null;
 }
 
 export default function AdminQuestionsPage({ params }: { params: Promise<{ examId: string }> }) {
@@ -611,18 +612,21 @@ function QuestionForm({
   setFormData 
 }: { 
   formData: Partial<QuestionRow>; 
-  setFormData: (data: Partial<QuestionRow>) => void; 
+  setFormData: Dispatch<SetStateAction<Partial<QuestionRow>>>; 
 }) {
   const updateField = (field: keyof QuestionRow, value: unknown) => {
     setFormData({ ...formData, [field]: value });
   };
 
   const addOption = () => {
-    const options = formData.options || [];
-    updateField('options', [...options, '']);
-    // keep option images aligned
-    const imgs = (formData.option_image_urls || []) as (string | null)[];
-    updateField('option_image_urls', [...imgs, null]);
+    // Use functional update to avoid state overwrite between sequential updates
+    setFormData((prev) => {
+      const prevOpts = prev.options || [];
+      const nextOpts = [...prevOpts, ""];
+      const prevImgs = (prev.option_image_urls || []) as (string | null)[];
+      const nextImgs = [...prevImgs, null];
+      return { ...prev, options: nextOpts, option_image_urls: nextImgs };
+    });
   };
 
   const updateOption = (index: number, value: string) => {
@@ -632,15 +636,14 @@ function QuestionForm({
   };
 
   const removeOption = (index: number) => {
-    const options = [...(formData.options || [])];
-    options.splice(index, 1);
-    updateField('options', options);
-    // remove corresponding image
-    const imgs = [...((formData.option_image_urls || []) as (string | null)[])];
-    if (imgs.length > index) {
-      imgs.splice(index, 1);
-      updateField('option_image_urls', imgs);
-    }
+    // Use functional update so both arrays stay in sync
+    setFormData((prev) => {
+      const nextOpts = [...(prev.options || [])];
+      if (index >= 0 && index < nextOpts.length) nextOpts.splice(index, 1);
+      const nextImgs = [...((prev.option_image_urls || []) as (string | null)[])];
+      if (index >= 0 && index < nextImgs.length) nextImgs.splice(index, 1);
+      return { ...prev, options: nextOpts, option_image_urls: nextImgs };
+    });
   };
 
   const needsOptions = ['single_choice', 'multiple_choice', 'multi_select'].includes(formData.question_type || '');

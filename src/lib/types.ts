@@ -17,7 +17,7 @@ export interface Question {
   order_index: number | null;
   // Optional image support
   question_image_url?: string | null;
-  option_image_urls?: string[] | null;
+  option_image_urls?: (string | null)[] | null;
 }
 
 export interface ExamInfo {
