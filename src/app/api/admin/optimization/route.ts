@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id: baselineId });
 
       case 'simulate-baseline':
-        const { function_names } = body;
-        const simulatedBaseline = await performanceMonitor.simulateBaseline(function_names);
+        const { function_names: simulationFunctionNames } = body;
+        const simulatedBaseline = await performanceMonitor.simulateBaseline(simulationFunctionNames);
         
         // Record the simulated baseline
         const recordedId = await functionRegistry.recordPerformanceBaseline({
