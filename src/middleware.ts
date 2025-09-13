@@ -1,41 +1,34 @@
 /**
- * Next.js Middleware with Auto-Recovery Integration
- * Handles load balancing and traffic routing for consolidated functions
+ * Next.js Middleware
+ * Handles basic request routing and security headers
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { loadBalancer, defaultLoadBalancerConfigs } from '@/lib/monitoring/load-balancer';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Check if this is a request to a consolidated function
-  if (pathname.startsWith('/api/admin/') && !pathname.includes('/health') && !pathname.includes('/monitoring')) {
-    // Route through load balancer for admin functions
-    return await loadBalancer.routeRequest(request, {
-      ...defaultLoadBalancerConfigs.admin,
-      fallback_endpoint: '/api/admin/health' // Fallback to health check
-    });
+  
+  // Add security headers
+  const response = NextResponse.next();
+  
+  // Basic security headers
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // CORS headers for API routes
+  if (pathname.startsWith('/api/public/')) {
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   }
-
-  if (pathname.startsWith('/api/public/') && !pathname.includes('/health')) {
-    // Route through load balancer for public functions
-    return await loadBalancer.routeRequest(request, {
-      ...defaultLoadBalancerConfigs.public,
-      fallback_endpoint: '/api/public/health' // Fallback to health check
-    });
+  
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers: response.headers });
   }
-
-  if (pathname.startsWith('/api/attempts/') && !pathname.includes('/health')) {
-    // Route through load balancer for attempt functions
-    return await loadBalancer.routeRequest(request, {
-      ...defaultLoadBalancerConfigs.attempts,
-      fallback_endpoint: '/api/attempts/health' // Fallback to health check
-    });
-  }
-
-  // For all other requests, continue normally
-  return NextResponse.next();
+  
+  return response;
 }
 
 export const config = {

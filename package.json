@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm run build:static && next build",
+    "build": "next build",
     "build:static": "node scripts/build-static-content.js",
     "build:next": "next build",
+    "build:full": "npm run build:static && next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -43,7 +44,7 @@
     "react-quill": "^2.0.0",
     "seedrandom": "^3.0.5",
     "xlsx": "^0.18.5",
-    "zod": "^4.0.17"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
