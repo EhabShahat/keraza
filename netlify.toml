@@ -1,0 +1,63 @@
+[build]
+  command = "npm ci --legacy-peer-deps && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Edge Functions Configuration
+[[edge_functions]]
+  function = "config-handler"
+  path = "/api/public/system-mode"
+
+[[edge_functions]]
+  function = "config-handler"
+  path = "/api/public/settings"
+
+[[edge_functions]]
+  function = "config-handler"
+  path = "/api/public/code-settings"
+
+[[edge_functions]]
+  function = "config-handler"
+  path = "/api/edge/invalidate-config"
+
+[[edge_functions]]
+  function = "auth-handler"
+  path = "/api/edge/validate-token"
+
+[[edge_functions]]
+  function = "auth-handler"
+  path = "/api/edge/invalidate-auth"
+
+[[edge_functions]]
+  function = "auth-handler"
+  path = "/admin/*"
+
+[[edge_functions]]
+  function = "auth-handler"
+  path = "/api/admin/*"
+
+[[edge_functions]]
+  function = "static-router"
+  path = "/api/public/*"
+
+[[edge_functions]]
+  function = "static-router"
+  path = "/api/edge/cache/*"
+
+[[edge_functions]]
+  function = "static-router"
+  path = "/favicon.ico"
+
+[[edge_functions]]
+  function = "static-router"
+  path = "/*.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)"
+
+[[edge_functions]]
+  function = "cache-handler"
+  path = "/api/public/*"

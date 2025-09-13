@@ -1,0 +1,1097 @@
+{
+  "timestamp": "2025-09-11T07:32:52.916Z",
+  "summary": {
+    "totalFunctions": 64,
+    "consolidationCandidates": 56,
+    "potentialSavings": 47,
+    "optimizationPotential": 73
+  },
+  "functions": [
+    {
+      "name": "admin_admins",
+      "path": "/api/admin/admins",
+      "fullPath": "admin\\admins\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1963,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_admins_[userId]",
+      "path": "/api/admin/admins/[userId]",
+      "fullPath": "admin\\admins\\[userId]\\route.ts",
+      "methods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 2419,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_attempts_[attemptId]_activity",
+      "path": "/api/admin/attempts/[attemptId]/activity",
+      "fullPath": "admin\\attempts\\[attemptId]\\activity\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 1825,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_attempts_[attemptId]_manual-grades",
+      "path": "/api/admin/attempts/[attemptId]/manual-grades",
+      "fullPath": "admin\\attempts\\[attemptId]\\manual-grades\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2091,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_attempts_[attemptId]_regrade",
+      "path": "/api/admin/attempts/[attemptId]/regrade",
+      "fullPath": "admin\\attempts\\[attemptId]\\regrade\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1048,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_attempts_[attemptId]",
+      "path": "/api/admin/attempts/[attemptId]",
+      "fullPath": "admin\\attempts\\[attemptId]\\route.ts",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "category": "admin",
+      "fileSize": 5337,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_attempts_[attemptId]_state",
+      "path": "/api/admin/attempts/[attemptId]/state",
+      "fullPath": "admin\\attempts\\[attemptId]\\state\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 3310,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_audit-logs",
+      "path": "/api/admin/audit-logs",
+      "fullPath": "admin\\audit-logs\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 2142,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_blocked-entries",
+      "path": "/api/admin/blocked-entries",
+      "fullPath": "admin\\blocked-entries\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 5455,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_blocked-entries_[id]",
+      "path": "/api/admin/blocked-entries/[id]",
+      "fullPath": "admin\\blocked-entries\\[id]\\route.ts",
+      "methods": [
+        "DELETE"
+      ],
+      "category": "admin",
+      "fileSize": 1719,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_bootstrap_create-first-user",
+      "path": "/api/admin/bootstrap/create-first-user",
+      "fullPath": "admin\\bootstrap\\create-first-user\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 240,
+      "dependencies": [],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_bootstrap_reset-password",
+      "path": "/api/admin/bootstrap/reset-password",
+      "fullPath": "admin\\bootstrap\\reset-password\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 214,
+      "dependencies": [],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_bootstrap",
+      "path": "/api/admin/bootstrap",
+      "fullPath": "admin\\bootstrap\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 298,
+      "dependencies": [],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_cleanup-expired",
+      "path": "/api/admin/cleanup-expired",
+      "fullPath": "admin\\cleanup-expired\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1102,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_dashboard",
+      "path": "/api/admin/dashboard",
+      "fullPath": "admin\\dashboard\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 3618,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams",
+      "path": "/api/admin/exams",
+      "fullPath": "admin\\exams\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1943,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_archive",
+      "path": "/api/admin/exams/[examId]/archive",
+      "fullPath": "admin\\exams\\[examId]\\archive\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1102,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_attempts_export",
+      "path": "/api/admin/exams/[examId]/attempts/export",
+      "fullPath": "admin\\exams\\[examId]\\attempts\\export\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 2981,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_attempts",
+      "path": "/api/admin/exams/[examId]/attempts",
+      "fullPath": "admin\\exams\\[examId]\\attempts\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 2263,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_codes_clear",
+      "path": "/api/admin/exams/[examId]/codes/clear",
+      "fullPath": "admin\\exams\\[examId]\\codes\\clear\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1220,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_codes",
+      "path": "/api/admin/exams/[examId]/codes",
+      "fullPath": "admin\\exams\\[examId]\\codes\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 4108,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_codes_[codeId]",
+      "path": "/api/admin/exams/[examId]/codes/[codeId]",
+      "fullPath": "admin\\exams\\[examId]\\codes\\[codeId]\\route.ts",
+      "methods": [
+        "GET",
+        "DELETE",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 6000,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_duplicate",
+      "path": "/api/admin/exams/[examId]/duplicate",
+      "fullPath": "admin\\exams\\[examId]\\duplicate\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2602,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_publish",
+      "path": "/api/admin/exams/[examId]/publish",
+      "fullPath": "admin\\exams\\[examId]\\publish\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2343,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_questions_reorder",
+      "path": "/api/admin/exams/[examId]/questions/reorder",
+      "fullPath": "admin\\exams\\[examId]\\questions\\reorder\\route.ts",
+      "methods": [
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 1163,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_questions",
+      "path": "/api/admin/exams/[examId]/questions",
+      "fullPath": "admin\\exams\\[examId]\\questions\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2009,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_questions_[questionId]",
+      "path": "/api/admin/exams/[examId]/questions/[questionId]",
+      "fullPath": "admin\\exams\\[examId]\\questions\\[questionId]\\route.ts",
+      "methods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 1722,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]_regrade",
+      "path": "/api/admin/exams/[examId]/regrade",
+      "fullPath": "admin\\exams\\[examId]\\regrade\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1018,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_exams_[examId]",
+      "path": "/api/admin/exams/[examId]",
+      "fullPath": "admin\\exams\\[examId]\\route.ts",
+      "methods": [
+        "GET",
+        "DELETE",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 2240,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_monitoring",
+      "path": "/api/admin/monitoring",
+      "fullPath": "admin\\monitoring\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 3724,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_optimization",
+      "path": "/api/admin/optimization",
+      "fullPath": "admin\\optimization\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 5734,
+      "dependencies": [
+        "next"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_settings",
+      "path": "/api/admin/settings",
+      "fullPath": "admin\\settings\\route.ts",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 2470,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students_bulk",
+      "path": "/api/admin/students/bulk",
+      "fullPath": "admin\\students\\bulk\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2840,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students_clear",
+      "path": "/api/admin/students/clear",
+      "fullPath": "admin\\students\\clear\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 714,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students",
+      "path": "/api/admin/students",
+      "fullPath": "admin\\students\\route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2653,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students_whatsapp",
+      "path": "/api/admin/students/whatsapp",
+      "fullPath": "admin\\students\\whatsapp\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2486,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students_[studentId]_reset-attempts",
+      "path": "/api/admin/students/[studentId]/reset-attempts",
+      "fullPath": "admin\\students\\[studentId]\\reset-attempts\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1392,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_students_[studentId]",
+      "path": "/api/admin/students/[studentId]",
+      "fullPath": "admin\\students\\[studentId]\\route.ts",
+      "methods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "category": "admin",
+      "fileSize": 1967,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_system_disable",
+      "path": "/api/admin/system/disable",
+      "fullPath": "admin\\system\\disable\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1665,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_system_enable",
+      "path": "/api/admin/system/enable",
+      "fullPath": "admin\\system\\enable\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 896,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_system_mode",
+      "path": "/api/admin/system/mode",
+      "fullPath": "admin\\system\\mode\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 1749,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_upload_logo",
+      "path": "/api/admin/upload/logo",
+      "fullPath": "admin\\upload\\logo\\route.ts",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "category": "admin",
+      "fileSize": 4409,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_upload_question-image",
+      "path": "/api/admin/upload/question-image",
+      "fullPath": "admin\\upload\\question-image\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 2168,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_users",
+      "path": "/api/admin/users",
+      "fullPath": "admin\\users\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "admin",
+      "fileSize": 3509,
+      "dependencies": [
+        "supabase",
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "admin_whoami",
+      "path": "/api/admin/whoami",
+      "fullPath": "admin\\whoami\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "admin",
+      "fileSize": 468,
+      "dependencies": [
+        "next",
+        "admin-auth"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "attempts_[attemptId]_activity",
+      "path": "/api/attempts/[attemptId]/activity",
+      "fullPath": "attempts\\[attemptId]\\activity\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "attempts",
+      "fileSize": 1737,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "attempts_[attemptId]_info",
+      "path": "/api/attempts/[attemptId]/info",
+      "fullPath": "attempts\\[attemptId]\\info\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "attempts",
+      "fileSize": 1800,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "attempts_[attemptId]_save",
+      "path": "/api/attempts/[attemptId]/save",
+      "fullPath": "attempts\\[attemptId]\\save\\route.ts",
+      "methods": [
+        "PATCH"
+      ],
+      "category": "attempts",
+      "fileSize": 1353,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "attempts_[attemptId]_state",
+      "path": "/api/attempts/[attemptId]/state",
+      "fullPath": "attempts\\[attemptId]\\state\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "attempts",
+      "fileSize": 696,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "attempts_[attemptId]_submit",
+      "path": "/api/attempts/[attemptId]/submit",
+      "fullPath": "attempts\\[attemptId]\\submit\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "attempts",
+      "fileSize": 1582,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "attempts_[attemptId]_upload",
+      "path": "/api/attempts/[attemptId]/upload",
+      "fullPath": "attempts\\[attemptId]\\upload\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "attempts",
+      "fileSize": 2440,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "auth_login",
+      "path": "/api/auth/login",
+      "fullPath": "auth\\login\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "auth",
+      "fileSize": 2241,
+      "dependencies": [
+        "supabase",
+        "next",
+        "jwt"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "auth_logout",
+      "path": "/api/auth/logout",
+      "fullPath": "auth\\logout\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "auth",
+      "fileSize": 354,
+      "dependencies": [],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "clear-attempts",
+      "path": "/api/clear-attempts",
+      "fullPath": "clear-attempts\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "utility",
+      "fileSize": 1211,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": false
+    },
+    {
+      "name": "public_active-exam",
+      "path": "/api/public/active-exam",
+      "fullPath": "public\\active-exam\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 2654,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_code-settings",
+      "path": "/api/public/code-settings",
+      "fullPath": "public\\code-settings\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 481,
+      "dependencies": [],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_exams_by-code",
+      "path": "/api/public/exams/by-code",
+      "fullPath": "public\\exams\\by-code\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 4311,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_exams_[examId]_access",
+      "path": "/api/public/exams/[examId]/access",
+      "fullPath": "public\\exams\\[examId]\\access\\route.ts",
+      "methods": [
+        "POST"
+      ],
+      "category": "public",
+      "fileSize": 4302,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_exams_[examId]_info",
+      "path": "/api/public/exams/[examId]/info",
+      "fullPath": "public\\exams\\[examId]\\info\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 828,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_results",
+      "path": "/api/public/results",
+      "fullPath": "public\\results\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 6007,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "high",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_settings",
+      "path": "/api/public/settings",
+      "fullPath": "public\\settings\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 2496,
+      "dependencies": [
+        "supabase"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_system-mode",
+      "path": "/api/public/system-mode",
+      "fullPath": "public\\system-mode\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 1262,
+      "dependencies": [
+        "supabase"
+      ],
+      "complexity": "low",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "public_validate-code",
+      "path": "/api/public/validate-code",
+      "fullPath": "public\\validate-code\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "public",
+      "fileSize": 3038,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": true
+    },
+    {
+      "name": "test-db",
+      "path": "/api/test-db",
+      "fullPath": "test-db\\route.ts",
+      "methods": [
+        "GET"
+      ],
+      "category": "utility",
+      "fileSize": 1332,
+      "dependencies": [
+        "supabase",
+        "next"
+      ],
+      "complexity": "medium",
+      "consolidationCandidate": false
+    }
+  ],
+  "metrics": {
+    "functionsByCategory": {
+      "admin": 45,
+      "attempts": 6,
+      "auth": 2,
+      "utility": 2,
+      "public": 9
+    },
+    "functionsByComplexity": {
+      "high": 23,
+      "medium": 26,
+      "low": 15
+    },
+    "totalFileSize": 144464,
+    "averageFileSize": 2257.25
+  },
+  "recommendations": [
+    "High function count (64). Immediate consolidation recommended.",
+    "45 admin functions can be consolidated into 1-2 handlers.",
+    "9 public functions can be consolidated with caching.",
+    "6 attempt functions can be unified into single handler.",
+    "56 functions are consolidation candidates (88%)."
+  ]
+}
