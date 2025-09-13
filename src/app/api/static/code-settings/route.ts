@@ -44,6 +44,5 @@ export async function GET() {
 }
 
 // Enable ISR
-export const revalidate = getContentRevalidateTime('codeSettings');
+export const revalidate = 900; // 15 minutes
 export const dynamic = 'force-static';
-export const tags = getContentCacheTags('codeSettings');

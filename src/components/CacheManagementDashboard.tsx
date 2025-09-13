@@ -17,7 +17,7 @@ import {
   Settings,
   TrendingUp,
   Clock
-} from 'lucide-react';
+} from '@/components/ui/icons';
 
 /**
  * Cache statistics interface

@@ -7,8 +7,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Optimize bundle
-  swcMinify: true,
   // Enable compression
   compress: true,
   // Power optimizations
