@@ -3,12 +3,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseServer } from '@/lib/supabase/server';
 import { BenchmarkMetrics } from '@/lib/benchmarking/performance-benchmarker';
 
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
 
     // Get the most recent baseline
     const { data, error } = await supabase
@@ -41,7 +41,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
     const metrics: BenchmarkMetrics = await request.json();
 
     // Validate metrics
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE() {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
 
     // Delete all baselines (for reset purposes)
     const { error } = await supabase

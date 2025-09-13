@@ -179,13 +179,13 @@ class AdminAPIHandler extends UnifiedAPIHandler {
   /**
    * Override handle method to integrate existing requireAdmin authentication
    */
-  async handle(req: NextRequest, context?: { params?: Promise<Record<string, string>> }): Promise<NextResponse> {
+  async handle(req: NextRequest): Promise<NextResponse> {
     try {
       // Use existing requireAdmin for authentication
       await requireAdmin(req);
       
       // Continue with unified handler processing
-      return super.handle(req, context);
+      return super.handle(req);
     } catch (error: any) {
       // requireAdmin throws NextResponse for auth failures
       if (error instanceof Response) {
@@ -998,22 +998,22 @@ class AdminAPIHandler extends UnifiedAPIHandler {
 const adminHandler = new AdminAPIHandler();
 
 // Export HTTP method handlers
-export async function GET(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return adminHandler.handle(req, context);
+export async function GET(req: NextRequest) {
+  return adminHandler.handle(req);
 }
 
-export async function POST(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return adminHandler.handle(req, context);
+export async function POST(req: NextRequest) {
+  return adminHandler.handle(req);
 }
 
-export async function PUT(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return adminHandler.handle(req, context);
+export async function PUT(req: NextRequest) {
+  return adminHandler.handle(req);
 }
 
-export async function PATCH(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return adminHandler.handle(req, context);
+export async function PATCH(req: NextRequest) {
+  return adminHandler.handle(req);
 }
 
-export async function DELETE(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return adminHandler.handle(req, context);
+export async function DELETE(req: NextRequest) {
+  return adminHandler.handle(req);
 }

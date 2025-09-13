@@ -580,24 +580,24 @@ class PublicAPIHandler extends UnifiedAPIHandler {
 const publicHandler = new PublicAPIHandler();
 
 // Export Next.js API route handlers
-export async function GET(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return publicHandler.handle(req, context);
+export async function GET(req: NextRequest) {
+  return publicHandler.handle(req);
 }
 
-export async function POST(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return publicHandler.handle(req, context);
+export async function POST(req: NextRequest) {
+  return publicHandler.handle(req);
 }
 
-export async function PUT(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return publicHandler.handle(req, context);
+export async function PUT(req: NextRequest) {
+  return publicHandler.handle(req);
 }
 
-export async function DELETE(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return publicHandler.handle(req, context);
+export async function DELETE(req: NextRequest) {
+  return publicHandler.handle(req);
 }
 
-export async function PATCH(req: NextRequest, context?: { params?: Promise<Record<string, string>> }) {
-  return publicHandler.handle(req, context);
+export async function PATCH(req: NextRequest) {
+  return publicHandler.handle(req);
 }
 
 // Force dynamic rendering

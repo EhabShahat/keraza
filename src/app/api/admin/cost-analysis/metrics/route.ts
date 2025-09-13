@@ -3,12 +3,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseServer } from '@/lib/supabase/server';
 import { CostMetrics } from '@/lib/benchmarking/cost-analyzer';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
     const { searchParams } = new URL(request.url);
     
     const limit = parseInt(searchParams.get('limit') || '30');
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
     const metrics: CostMetrics = await request.json();
 
     // Validate metrics
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = supabaseServer();
     const { searchParams } = new URL(request.url);
     
     const olderThan = searchParams.get('olderThan'); // ISO date string

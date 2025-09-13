@@ -134,7 +134,7 @@ async function runRegressionCheck() {
     }
 
     // Get current metrics
-    const currentMetrics = await performanceBenchmarker.collectSystemMetrics();
+    const currentMetrics = await performanceBenchmarker.getCurrentMetrics();
     
     // Compare with baseline
     const comparison = await performanceBenchmarker.compareWithBaseline(currentMetrics);
