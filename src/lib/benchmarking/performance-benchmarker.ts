@@ -49,7 +49,7 @@ export interface BenchmarkComparison {
     overallScore: number;
 }
 
-export class PerformanceBenchmarker {
+class PerformanceBenchmarker {
     private baselineMetrics: BenchmarkMetrics | null = null;
     private testResults: BenchmarkResult[] = [];
 
